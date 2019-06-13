@@ -1,0 +1,29 @@
+{
+	"cSpell.words": [
+		"Suska",
+		"abcdefghijklmnopqrstuvwxyz",
+		"brotli",
+		"browserslist",
+		"camelcase",
+		"linebreak",
+		"memoized",
+		"qmodel",
+		"qubit",
+		"qubits",
+		"stylelint",
+		"svgr",
+		"xlink",
+		"zopfli",
+	],
+	"files.associations": {
+		".*rc": "json"
+	},
+	"files.exclude": {
+		"/.cache": true
+	},
+	"search.exclude": {
+		"/.cache": true,
+		"/build*": true,
+	},
+	"css.lint.emptyRules": "ignore",
+}

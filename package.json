@@ -1,0 +1,49 @@
+{
+	"name": "qmodel",
+	"version": "0.5.2",
+	"description": "Quantum Programmer's Model",
+	"keywords": [
+		"quantum"
+	],
+	"author": "Mark Suska <mark.suska@me.com>",
+	"license": "MIT",
+	"repository": "github:EvilHacker/qmodel.git",
+	"scripts": {
+		"start": "scripts/start.sh --dev",
+		"start-prod": "scripts/start.sh --prod",
+		"build": "scripts/build.sh --compress",
+		"clean": "scripts/clean.sh",
+		"clean-all": "scripts/clean.sh --all",
+		"lint": "scripts/lint.sh"
+	},
+	"dependencies": {
+		"react": "^16.8.6",
+		"react-dom": "^16.8.6"
+	},
+	"devDependencies": {
+		"@babel/core": "^7.4.5",
+		"@babel/plugin-proposal-class-properties": "^7.4.4",
+		"@babel/preset-react": "^7.0.0",
+		"@svgr/parcel-plugin-svgr": "^4.3.0",
+		"autoprefixer": "^9.6.0",
+		"babel-eslint": "^10.0.1",
+		"babel-plugin-transform-react-remove-prop-types": "^0.4.24",
+		"brotli-cli": "^0.0.1",
+		"eslint": "^5.16.0",
+		"eslint-friendly-formatter": "^4.0.1",
+		"eslint-plugin-react": "^7.13.0",
+		"html-inline": "^1.2.0",
+		"http-server": "^0.11.1",
+		"js-beautify": "^1.10.0",
+		"parcel-bundler": "^1.12.3",
+		"parcel-plugin-eslint": "^1.0.7",
+		"parcel-plugin-stylelint-all": "^0.1.0",
+		"postcss-modules": "^1.4.1",
+		"stylelint": "^10.1.0",
+		"stylelint-config-standard": "^18.3.0",
+		"zopfli-node": "^2.0.3"
+	},
+	"browserslist": [
+		"defaults, last 2 major versions, > 0.2%, not dead"
+	]
+}

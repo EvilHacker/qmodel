@@ -1,0 +1,24 @@
+{
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			// Required software:
+			//  - Chrome web browser
+			//    (https://www.google.com/chrome/)
+			//  - "Debugger for Chrome" Visual Studio Code extension
+			//    (https://marketplace.visualstudio.com/items?itemName=msjsdiag.debugger-for-chrome)
+			//  - React DevTools Chrome extension (optional)
+			//    (https://fb.me/react-devtools/)
+			"name": "Run in Chrome",
+			"type": "chrome",
+			"request": "launch",
+			"preLaunchTask": "Start Dev Server",
+			"url": "http://localhost:1234",
+			"webRoot": "${workspaceRoot}/source/",
+			"sourceMaps": true,
+		}
+	]
+}

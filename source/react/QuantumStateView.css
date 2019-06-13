@@ -1,0 +1,111 @@
+/**
+ * Copyright (c) Mark Suska.
+ *
+ * @license MIT
+ */
+
+.quantumState {
+	position: relative;
+	overflow-x: scroll;
+	font-family: Courier, monospace;
+	user-select: none;
+}
+
+.quantumState > div {
+	position: absolute;
+	height: 16px;
+	line-height: 13px;
+	text-shadow: -1px -1px 1px #fff, -1px 1px 1px #fff, 1px -1px 1px #fff, 1px 1px 1px #fff;
+	transition: 0.7s;
+}
+
+.wheels {
+	position: relative;
+	font-family: "Lucida Console", Monaco, monospace;
+	font-size: 24px;
+}
+
+.arcs {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+.direction {
+	position: absolute;
+	opacity: 0;
+	appearance: none;
+	outline: none;
+	background: #28f;
+	height: 6px;
+	border-radius: 3px;
+	transform: rotate(-90deg);
+	transition: 0.3s;
+}
+
+.direction:hover {
+	opacity: 1;
+	cursor: grab;
+}
+
+.direction:active {
+	opacity: 1;
+	background: #28f4;
+	cursor: grabbing;
+}
+
+.qubitLabel {
+	height: 13px;
+	margin-top: 1px;
+	font-family: Menlo, "Lucida Console", monospace;
+	color: #007;
+}
+
+.binary {
+	position: absolute;
+	padding-bottom: 3px;
+	border-radius: 5px;
+	text-align: center;
+	transition: background-color 0.4s, 0.7s;
+}
+
+.binary > div {
+	height: 13px;
+	margin-bottom: 1px;
+	border-radius: 2px;
+}
+
+.zero {
+	color: #888;
+}
+
+.one {
+	background-color: #1143;
+}
+
+.decimal {
+	display: inline-block;
+	margin-top: 8px;
+	line-height: 8px;
+	writing-mode: vertical-rl;
+	text-align: right;
+	transform: rotate(180deg);
+	color: #007;
+}
+
+.select {
+	background-color: #fe07;
+}
+
+.match {
+	font-weight: 700;
+	color: #040;
+	background-color: #8f07;
+	transition: background-color 80ms;
+}
+
+/* "CSS Modules" ensure globally unique IDs for SVG defs */
+#wheel { /* for SVG use */ }
+#axle { /* for SVG use */ }
+#verticalGuide { /* for SVG use */ }
+#directionWheel { /* for SVG use */ }

@@ -1,0 +1,73 @@
+{
+	// See https://go.microsoft.com/fwlink/?LinkId=733558
+	// for the documentation about the tasks.json format
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start Dev Server",
+			"group": "build",
+			"type": "npm",
+			"script": "start",
+			"isBackground": true,
+			"problemMatcher": [
+				{
+					"pattern": "$eslint-stylish",
+					"background": {
+						"activeOnStart": true,
+						"beginsPattern": ": Compiling[.][.][.]$",
+						"endsPattern": "^✨  Built in "
+					}
+				}
+			]
+		},
+		{
+			"label": "Start Prod Server",
+			"group": "build",
+			"type": "npm",
+			"script": "start-prod",
+			"isBackground": true,
+			"problemMatcher": [
+				{
+					"pattern": "$eslint-stylish",
+					"background": {
+						"activeOnStart": true,
+						"beginsPattern": "^Starting up http-server",
+						"endsPattern": "^Hit CTRL-C to stop the server"
+					}
+				}
+			]
+		},
+		{
+			"label": "Build",
+			"group": "build",
+			"type": "npm",
+			"script": "build",
+			"problemMatcher": [
+				"$eslint-stylish"
+			]
+		},
+		{
+			"label": "Clean",
+			"group": "build",
+			"type": "npm",
+			"script": "clean",
+			"problemMatcher": []
+		},
+		{
+			"label": "Clean All",
+			"group": "build",
+			"type": "npm",
+			"script": "clean-all",
+			"problemMatcher": []
+		},
+		{
+			"label": "Lint",
+			"group": "build",
+			"type": "npm",
+			"script": "lint",
+			"problemMatcher": [
+				"$eslint-stylish"
+			]
+		}
+	]
+}

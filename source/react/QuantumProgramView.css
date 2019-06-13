@@ -1,0 +1,172 @@
+/**
+ * Copyright (c) Mark Suska.
+ *
+ * @license MIT
+ */
+
+.program {
+	font-family: "Courier New", Courier, monospace;
+}
+
+.program td {
+	margin: 0;
+	padding: 1px;
+	border: 0;
+}
+
+.program button {
+	border: 0;
+	outline: 0;
+	transition: 0.2s;
+}
+
+.button {
+	width: 48px;
+	height: 38px;
+	margin: 0 2px;
+	padding: 0;
+	overflow: hidden;
+	border-radius: 9px;
+	background-color: #ccd;
+}
+
+.button:hover {
+	background-color: #6ad;
+}
+
+.button:active {
+	background-color: #48b;
+}
+
+.button svg {
+	height: 24px;
+	vertical-align: middle;
+	fill: #222;
+	filter: drop-shadow(0 1px 3px #fff);
+}
+
+.button:hover svg,
+.button:active svg {
+	fill: #eee;
+	filter: drop-shadow(0 1px 3px #000);
+}
+
+.editor {
+	position: relative;
+}
+
+.editor textarea {
+	min-width: 197px;
+	min-height: 197px;
+	margin: 2px;
+	border: 1px solid #ccc;
+	white-space: pre;
+	font: inherit;
+	overflow-x: scroll;
+	resize: both;
+	scroll-behavior: smooth;
+}
+
+.textOverlay {
+	position: absolute;
+	top: 4px;
+	left: 4px;
+	right: 4px;
+	overflow: hidden;
+	pointer-events: none;
+}
+
+.textOverlay > * {
+	position: absolute;
+	pointer-events: auto;
+}
+
+.gutter {
+	position: absolute;
+	box-sizing: border-box;
+	overflow: hidden;
+	border: 0;
+	border-right: 1px solid #ccc;
+	background-color: #8882;
+	text-align: right;
+	user-select: none;
+	cursor: cell;
+}
+
+.gutter > * {
+	position: absolute;
+	right: 0;
+}
+
+.lineNumber {
+	width: 100%;
+	padding-right: 2px;
+	border-radius: 3px;
+}
+
+.lineNumber:hover {
+	background-color: #36f2;
+}
+
+.lineNumber.selected {
+	margin-top: -1px;
+	border: solid #36fc;
+	border-width: 1px 0;
+	background-color: #36f5;
+}
+
+.pointer {
+	margin-top: -6px;
+	padding-right: 0;
+	letter-spacing: -1px;
+	font-size: 30px;
+	line-height: 35px;
+	color: #0c7;
+}
+
+.errorHighlight {
+	position: absolute;
+	right: 0;
+	background-color: #f001;
+	pointer-events: none;
+	user-select: none;
+}
+
+.errorMessage {
+	position: absolute;
+	margin: 1px 6px;
+	padding: 1px 5px;
+	border: 1px solid #dbb;
+	border-radius: 3px;
+	color: #a00;
+	background-color: #eeee;
+	box-shadow: 2px 4px 8px #0004;
+}
+
+.popup {
+	position: absolute;
+	margin: 1px;
+	padding: 1px 0;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+	background-color: #eee;
+	box-shadow: 2px 4px 8px #0004;
+}
+
+.popup button {
+	width: 100%;
+	padding: 3px 7px;
+	margin: 0;
+	text-align: left;
+	background-color: inherit;
+}
+
+.popup button:hover {
+	color: #fff;
+	background-color: #48e;
+}
+
+.popup button:active {
+	color: #fff;
+	background-color: #36c;
+}
