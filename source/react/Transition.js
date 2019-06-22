@@ -20,9 +20,9 @@ export function easeQuadraticInOut(t) {
 export class Transition extends Component {
 	static propTypes = {
 		duration: PropTypes.number.isRequired, // in milliseconds
-		render: PropTypes.func.isRequired,
-		ease: PropTypes.func,
-		onDone: PropTypes.func,
+		render: PropTypes.func.isRequired, // (t: number) => React.ReactElement
+		ease: PropTypes.func, // (t: number) => number
+		onDone: PropTypes.func, // () => undefined
 	}
 
 	static defaultProps = {

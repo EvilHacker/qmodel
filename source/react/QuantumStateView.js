@@ -16,9 +16,12 @@ const axleY = 218
 
 export class StateView extends PureComponent {
 	static propTypes = {
-		amplitudes: PropTypes.array.isRequired,
-		condition: PropTypes.object, // optional
-		gates: PropTypes.array, // optional
+		amplitudes: PropTypes.arrayOf(PropTypes.number).isRequired,
+		condition: PropTypes.shape({
+			mask: PropTypes.number,
+			value: PropTypes.number,
+		}),
+		gates: PropTypes.arrayOf(PropTypes.string),
 		directionMode: PropTypes.oneOf(["compass", "complex"]),
 	}
 

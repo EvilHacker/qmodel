@@ -8,7 +8,8 @@
  * Normalize a quantum state of complex amplitudes so that
  * the sum of squares is 1.
  *
- * @param {number[]} amplitudes - an array of alternating real and imaginary amplitudes
+ * @param {number[]} amplitudes - an array of alternating real and imaginary values
+ * @returns {number[]} an array of alternating real and imaginary values
  */
 export function normalized(amplitudes) {
 	const sumOfSquares = amplitudes.reduce((accumulated, value) => accumulated + value*value, 0)
@@ -21,10 +22,13 @@ export function normalized(amplitudes) {
 
 /**
  * Return a function that interpolates between two quantum states.
+ * This function takes parameter t between 0 and 1 and returns a
+ * new amplitudes array in-between the the original two quantum states.
  *
- * @param {number[]} amplitudes1 - an array of alternating real and imaginary amplitudes
- * @param {number[]} amplitudes2 - an array of alternating real and imaginary amplitudes
- * @param {function} ease - easing function
+ * @param {number[]} amplitudes1 - an array of alternating real and imaginary values
+ * @param {number[]} amplitudes2 - an array of alternating real and imaginary values
+ * @returns {(t: number) => number[]} function with argument:
+ * - t - number between 0 and 1
  */
 export function tween(amplitudes1, amplitudes2) {
 	return t => {

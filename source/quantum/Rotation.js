@@ -6,8 +6,13 @@
 
 /**
  * Parse a rotation expression string and return a rotation number.
+ *
+ * @param {string} string - a numeric expression
+ * @returns {number} a number
+ * @throws exception or error description string
  */
 export function parseRotation(string) {
+	// TODO: make this more efficient
 	const replacements = {
 		"½": " +(1/2)",
 		"⅓": " +(1/3)",

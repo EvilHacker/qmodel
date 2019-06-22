@@ -7,6 +7,9 @@
 /**
  * Convert the integer n to a hexadecimal string.
  * Do the conversion only for a "development" build for easier debugging.
+ *
+ * @param {number} n - a positive integer
+ * @returns {number|string}
  */
 function h(n) {
 	if (process.env.NODE_ENV === "development") {
@@ -17,13 +20,16 @@ function h(n) {
 
 /**
  * Normalize the supplied op (operation string) by:
- *  - removing comments, whitespace, and ignored qubits;
- *  - accept lower-case characters;
- *  - accept alternative characters: "│|_⨁⊕+";
- *  - replace with these characters: '-', 0', '1', 'H', 'N', 'X', 'Y'.
+ * - removing comments, whitespace, and ignored qubits;
+ * - accepting lower-case characters;
+ * - accepting alternative characters: "│|_⨁⊕+".
  *
- * Return the normalized operation string.
+ * Return a string with only these characters: '-', 0', '1', 'H', 'N', 'X', 'Y'.
  * Throw an exception if the operation string is invalid.
+ *
+ * @param {string} op - a human-written operation string
+ * @returns {string} string containing only the characters: "-01HNXY"
+ * @throws error description
  */
 export function normalizeOp(op) {
 	if (op instanceof Operation) {
@@ -104,9 +110,12 @@ export function normalizeOp(op) {
  */
 export class Operation {
 	/**
-	 * Construct a new operation given either:
-	 *  - an operation string, or
-	 *  - an exiting Operation to copy.
+	 * Construct a new operation.
+	 *
+	 * @param {string|Operation|null} op - either:
+	 * - an operation string,
+	 * - an exiting Operation to copy, or
+	 * - null for a no-op
 	 */
 	constructor(op) {
 		if (op instanceof Operation) {
@@ -146,6 +155,9 @@ export class Operation {
 	 *
 	 * Return '-', meaning don't care about this qubit, for any index
 	 * greater than the length of the operation.
+	 *
+	 * @param {number} index - integer greater or equal to 0
+	 * @returns {string} a single operation character, one of: "-01HNXY"
 	 */
 	get(index) {
 		if (index >= this.length) {
@@ -157,15 +169,11 @@ export class Operation {
 
 	/**
 	 * Return all conditions ('0', or '1') in the operation.
-	 * The conditions are expressed as an integer mask and value where:
-	 *  - each bit of the mask is set to 1 if there is either a '0', or '1' in the op;
-	 *  - each bit of the value is set to 1 only if there is a '1' in the op.
-
-	 * Return the mask and value as a structure:
-	 * {
-	 * 	mask: conditionMask
-	 * 	value: conditionValue,
-	 * }
+	 * The conditions are expressed as an integer mask and value properties of an object.
+	 *
+	 * @returns {object} an object with integer mask and value
+	 * @property {number} mask - bits are set to 1 if there is either a '0', or '1' in the op
+	 * @property {number} value - bits are set to 1 if there is either a '1' in the op
 	 */
 	getCondition() {
 		this.compiled()
@@ -173,8 +181,10 @@ export class Operation {
 	}
 
 	/**
-	 * Return an array of operation characters.
+	 * Return an array of operation characters (gates).
 	 * This array excludes conditions and ignored qubits.
+	 *
+	 * @returns {Array<string|undefined>} array containing 'H', 'N', 'X', 'Y', or undefined
 	 */
 	getGates() {
 		this.compiled()
@@ -183,9 +193,10 @@ export class Operation {
 
 	/**
 	 * Return the compiled function that will transform a quantum state by this operation.
-	 * The returned function takes two arguments:
-	 *  - the quantum state - an array of alternating real and imaginary amplitude values,
-	 *  - the rotation - in units of whole rotations (not radians)
+	 *
+	 * @returns {(amplitudes: number[], rotation: number) => undefined} function with arguments:
+	 * - amplitudes - an array of alternating real and imaginary values
+	 * - rotation - angle in units of whole rotations (not radians)
 	 */
 	compiled() {
 		if (this.transform) {
@@ -377,12 +388,13 @@ export class Operation {
 	 *
 	 * The loop expects a variable "i" defined in an outer scope whose value will
 	 * be the starting index of the loop.
-	 * The loop will evaluate the body of the code 2^bitLength times with a range of bits
-	 * within i set to all possible values.
+	 * The loop will evaluate the body of the code 2**bitLength times with a
+	 * contiguous range of bits within i set to all possible values.
 	 *
-	 * @param {int} startIndex - starting bit index of the loop counter
-	 * @param {int} bitLength - number of bits of the loop counter
+	 * @param {number} startIndex - starting bit index of the loop counter
+	 * @param {number} bitLength - number of bits of the loop counter
 	 * @param {string} body - Javascript code to repeat in the loop
+	 * @returns {string} Javascript code
 	 */
 	codeForLoop(startIndex, bitLength, body) {
 		if (bitLength < 1 || !body) {
@@ -428,8 +440,9 @@ export class Operation {
 	 * The counterBitMask specifies the subset of bits within i to iterate over.
 	 * The loop will evaluate the body of the code with i set to all bit values.
 	 *
-	 * @param {int} counterBitMask - bits of the loop counter to iterate over
+	 * @param {number} counterBitMask - bits of the loop counter to iterate over
 	 * @param {string} body - Javascript code to repeat in the loop
+	 * @returns {string} Javascript code
 	 */
 	codeForNestedLoops(counterBitMask, body) {
 		// find all contiguous runs of counter bits
@@ -462,11 +475,11 @@ export const noop = new Operation(null)
  */
 export class Simulator {
 	/**
-	 * Construct a new simulator with either:
-	 *  - an initial number of qubits, or
-	 *  - a copy of another Simulator.
+	 * Construct a new simulator.
 	 *
-	 * @param {int|Simulator} [argument] - number of qubits, or another Simulator
+	 * @param {number|Simulator} [argument] - either:
+	 * - an initial number of qubits, or
+	 * - a copy of another Simulator
 	 */
 	constructor(argument = 0) {
 		if (argument instanceof Simulator) {
@@ -490,7 +503,8 @@ export class Simulator {
 	 * Perform an operation modifying the quantum state.
 	 *
 	 * @param {string|Operation} op - the operation to perform
-	 * @param {number} rotation - whole rotations (not radians)
+	 * @param {number} rotation - angle in units of whole rotations (not radians)
+	 * @returns {Operation} the compiled Operation that was performed
 	 */
 	do(op, rotation = 1/2) {
 		op = this.compiledOp(op)
@@ -521,7 +535,8 @@ export class Simulator {
 	/**
 	 * Return a compiled Operation.
 	 *
-	 * @param {string|Operation} op
+	 * @param {string|Operation} op - an operation
+	 * @returns {Operation} a compiled Operation
 	 */
 	compiledOp(op) {
 		if (op instanceof Operation) {
@@ -536,6 +551,9 @@ export class Simulator {
 	 * Increase the quantum state to the specified number of qubits.
 	 * Any new qubits are assumed to be in the 0 state.
 	 * Don't do anything if the current state already has enough qubits.
+	 *
+	 * @param {number} numberOfQubits - integer greater or equal to 0
+	 * @returns {undefined} void
 	 */
 	expandState(numberOfQubits) {
 		if (numberOfQubits > this.numberOfQubits) {

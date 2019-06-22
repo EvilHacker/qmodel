@@ -10,7 +10,8 @@ const delayedSaves = {}
  * Load a serialized JSON value from browser local storage.
  *
  * @param {string} key - the name of the local storage item
- * @param {*} defaultValue - value to return if not found or error
+ * @param {*} defaultValue - value to return if key not found or other error
+ * @returns {*} a JSON value
  */
 export function load(key, defaultValue = undefined) {
 	const value = window.localStorage.getItem(key)
@@ -34,6 +35,7 @@ export function load(key, defaultValue = undefined) {
  * @param {string} key - the name of the local storage item
  * @param {*} value - the JSON value to store
  * @param {number} [delay] - milliseconds of delay before actually storing
+ * @returns {undefined} void
  */
 export function save(key, value, delay = 0) {
 	clearTimeout(delayedSaves[key])

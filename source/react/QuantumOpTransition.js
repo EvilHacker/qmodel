@@ -18,7 +18,7 @@ export class QuantumOpTransition extends PureComponent {
 		rotation: PropTypes.number,
 		directionMode: PropTypes.oneOf(["compass", "complex"]),
 		transitionMode: PropTypes.oneOf(["simple", "accurate"]),
-		onDone: PropTypes.func,
+		onDone: PropTypes.func, // () => undefined
 	}
 
 	static defaultProps = {

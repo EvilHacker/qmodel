@@ -20,10 +20,10 @@ const padding = 4
 export class QuantumProgramView extends PureComponent {
 	static propTypes = {
 		defaultValue: PropTypes.string,
-		onOp: PropTypes.func,
-		onReset: PropTypes.func,
-		onSettings: PropTypes.func,
-		onProgramChanged: PropTypes.func,
+		onOp: PropTypes.func, // (op: string, rotation: number) => undefined
+		onReset: PropTypes.func, // () => undefined
+		onSettings: PropTypes.func, // () => undefined
+		onProgramChanged: PropTypes.func,  // (program: string) => undefined
 	}
 
 	static defaultProps = {
@@ -35,13 +35,13 @@ export class QuantumProgramView extends PureComponent {
 
 	state = {
 		programLines: [],
-		nextLineNumber: 0,
-		menuLineNumber: null,
-		errorLineNumber: null,
+		nextLineNumber: 0, // zero based
+		menuLineNumber: null, // zero based
+		errorLineNumber: null, // zero based
 		errorMessage: null,
-		gutterWidth: 0,
-		textHeight: 0,
-		verticalScroll: 0,
+		gutterWidth: 0, // in pixels
+		textHeight: 0, // in pixels
+		verticalScroll: 0, // in pixels
 		stepping: false,
 	}
 
