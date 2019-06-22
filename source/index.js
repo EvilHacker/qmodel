@@ -11,6 +11,7 @@ import { load, save } from './LocalStorage'
 import { QuantumOpTransition } from './react/QuantumOpTransition'
 import { QuantumProgramView } from './react/QuantumProgramView'
 import { Simulator } from './quantum/Simulator'
+import Github from './github.svg'
 
 const defaultProgram =
 `HHHH,     1/2
@@ -192,8 +193,13 @@ class App extends PureComponent {
 				{settings}
 			</div>
 
-			<div className={styles.copyright}>
-				Copyright © 2019 Mark Suska
+			<div className={styles.footer}>
+				<div>
+					Copyright © 2019 Mark Suska
+				</div>
+				<div>
+					<a href="https://github.com/EvilHacker/qmodel"><Github/></a>
+				</div>
 			</div>
 		</div>
 	}

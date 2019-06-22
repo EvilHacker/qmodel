@@ -50,7 +50,35 @@
 	pointer-events: none;
 }
 
-.copyright {
-	margin: 20px 4px;
+.footer {
+	display: table;
+	width: 100%;
 	color: #bbb;
+}
+
+.footer > * {
+	display: table-cell;
+	padding: 4px;
+	vertical-align: middle;
+}
+
+.footer > *:last-child {
+	text-align: right;
+}
+
+.footer a {
+	display: inline-block;
+	height: 26px;
+	padding: 2px;
+	margin-right: 12px;
+}
+
+.footer svg {
+	height: inherit;
+	fill: #bbb;
+	transition: 0.2s;
+}
+
+.footer svg:hover {
+	fill: #999;
 }
