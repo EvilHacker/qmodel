@@ -63,8 +63,8 @@
 
 .binary {
 	position: absolute;
-	padding-bottom: 3px;
-	border-radius: 5px;
+	padding-bottom: 2px;
+	border-radius: 4px;
 	text-align: center;
 	transition: background-color 0.4s, 0.7s;
 }
@@ -85,7 +85,7 @@
 
 .decimal {
 	display: inline-block;
-	margin-top: 8px;
+	margin-top: 6px;
 	line-height: 8px;
 	writing-mode: vertical-rl;
 	text-align: right;

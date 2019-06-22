@@ -427,7 +427,7 @@ class BitVectorView extends PureComponent {
 				{n > 1 && <div
 					className={styles.decimal}
 					style={{
-						height: Math.ceil(0.301 * n) * fontSize * 0.55,
+						height: Math.ceil(0.301 * n) * fontSize * 0.6,
 						fontSize: fontSize
 					}}
 				>
