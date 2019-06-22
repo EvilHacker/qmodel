@@ -19,6 +19,15 @@ then
 	# install all required javascript packages (if not installed already) and remove unneeded packages
 	npm install
 
+	# patch "parcel" so that CSS Modules configuration can be overridden, but note that
+	# a fix for this should be available in a future "parcel" release
+	sed 's/ generateScopedName:/ _generateScopedName:/' \
+		node_modules/parcel-bundler/src/transforms/postcss.js > \
+		node_modules/parcel-bundler/src/transforms/postcss.patched.js
+	mv \
+		node_modules/parcel-bundler/src/transforms/postcss.patched.js \
+		node_modules/parcel-bundler/src/transforms/postcss.js
+
 	# update timestamp on this file to indicate when packages were last checked
 	touch node_modules/.installed
 fi

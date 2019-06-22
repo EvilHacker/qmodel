@@ -29,6 +29,18 @@ echo
 
 cd build-prod
 
+# minify all js files even more
+echo "⚙️  Minifying all js files."
+find . -type f -name '*.js' | cut -c 3- | while read -r file; do
+	# this sequence minifies js well
+	echo "╰── $file"
+	terser "$file" --compress passes=1 --mangle \
+		| uglifyjs --compress passes=2 --mangle \
+		| uglifyjs --compress passes=2 -o "$file"
+done
+
+echo
+
 # inline referenced js and css into all html files
 echo "⚙️  Inlining js and css into all html files."
 find . -type f -name '*.html' | cut -c 3- | while read -r file; do

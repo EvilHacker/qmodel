@@ -10,7 +10,8 @@ function hash(data) {
 	n = Math.floor(n / (digits.length - 11));
 	do {
 		h += digits[n % digits.length];
-	} while ((n = Math.floor(n / digits.length)) >= digits.length);
+		n = Math.floor(n / digits.length);
+	} while (n >= digits.length);
 	return h;
 }
 
@@ -20,10 +21,9 @@ module.exports = {
 		"autoprefixer": {
 		},
 		"postcss-modules": {
-			generateScopedName: (name, filename) =>
-				process.env.NODE_ENV === "development"
-					? `${name}_${hash(filename)}`
-					: hash(filename + name)
+			generateScopedName: process.env.NODE_ENV === "development"
+				? (name, filename) => `${name}_${hash(filename)}`
+				: (name, filename) => hash(filename + name)
 		}
 	}
 };
