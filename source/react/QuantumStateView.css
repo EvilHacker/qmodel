@@ -15,7 +15,11 @@
 	position: absolute;
 	height: 16px;
 	line-height: 13px;
-	text-shadow: -1px -1px 1px #fff, -1px 1px 1px #fff, 1px -1px 1px #fff, 1px 1px 1px #fff;
+	text-shadow:
+		-1px -1px 1px #fff,
+		-1px 1px 1px #fff,
+		1px -1px 1px #fff,
+		1px 1px 1px #fff;
 	transition: 0.7s;
 }
 

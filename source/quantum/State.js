@@ -13,19 +13,10 @@
 export function normalized(amplitudes) {
 	const sumOfSquares = amplitudes.reduce((accumulated, value) => accumulated + value*value, 0)
 	if (sumOfSquares != 1) {
-		amplitudes = amplitudes.map(value => value / sumOfSquares)
+		const scaleFactor = 1 / sumOfSquares
+		amplitudes = amplitudes.map(value => value * scaleFactor)
 	}
 	return amplitudes
-}
-
-export function easeQuadraticInOut(t) {
-	return t <= 0.5
-		? 2 * t * t
-		: 2 * t * (2 - t) - 1
-}
-
-export function easeSinusoidalInOut(t) {
-	return 0.5 * (1 - Math.cos(Math.PI * t))
 }
 
 /**
@@ -35,15 +26,13 @@ export function easeSinusoidalInOut(t) {
  * @param {number[]} amplitudes2 - an array of alternating real and imaginary amplitudes
  * @param {function} ease - easing function
  */
-export function tween(amplitudes1, amplitudes2, ease = easeSinusoidalInOut) {
+export function tween(amplitudes1, amplitudes2) {
 	return t => {
 		if (t <= 0) {
 			return amplitudes1
 		} else if (t >= 1) {
 			return amplitudes2
 		}
-
-		t = ease(t)
 
 		const length = amplitudes2.length
 		const amplitudes = []

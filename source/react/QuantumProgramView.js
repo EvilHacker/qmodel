@@ -244,33 +244,32 @@ export class QuantumProgramView extends PureComponent {
 		}
 
 		// error message (if any)
-		let errorHighlight = undefined
-		let errorMessage = undefined
+		let error = undefined
 		if (errorLineNumber !== null) {
-			errorHighlight = <div
-				key="e"
-				className={styles.errorHighlight}
-				style={{
-					top: errorLineNumber * lineHeight - verticalScroll + padding - 1,
-					left: gutterWidthPx,
-					height: lineHeight + 2,
-				}}
-			/>
-
-			errorMessage = <div
-				className={styles.errorMessage}
-				style={{
-					top: (errorLineNumber + 1) * lineHeight - verticalScroll + padding,
-					left: gutterWidthPx
-				}}
-				onClick={this.onDismissError}
-				onContextMenu={this.onDismissError}
-			>
-				{this.state.errorMessage}
-			</div>
+			error = <>
+				<div
+					className={styles.errorHighlight}
+					style={{
+						top: errorLineNumber * lineHeight - verticalScroll + padding - 1,
+						left: gutterWidthPx,
+						height: lineHeight + 2,
+					}}
+				/>
+				<div
+					className={styles.errorMessage}
+					style={{
+						top: (errorLineNumber + 1) * lineHeight - verticalScroll + padding,
+						left: gutterWidthPx
+					}}
+					onClick={this.onDismissError}
+					onContextMenu={this.onDismissError}
+				>
+					{this.state.errorMessage}
+				</div>
+			</>
 		}
 
-		// pop-up menu
+		// pop-up menu (if shown)
 		let gutterMenu = undefined
 		if (menuLineNumber !== null) {
 			gutterMenu = <div
@@ -354,8 +353,7 @@ export class QuantumProgramView extends PureComponent {
 								{gutterContent}
 							</div>
 
-							{errorHighlight}
-							{errorMessage}
+							{error}
 						</div>
 
 						{gutterMenu}

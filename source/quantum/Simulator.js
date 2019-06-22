@@ -117,6 +117,16 @@ export class Operation {
 			this.transform = op.transform
 			this.condition = op.condition
 			this.gates = op.gates
+		} else if (op === null) {
+			// No-Op
+			this.op = op
+			this.minLength = this.length = 0
+			this.transform = () => undefined
+			this.condition = {
+				mask: 0,
+				value: 0,
+			}
+			this.gates = []
 		} else {
 			// create a new operation that is yet to be compiled
 			this.op = normalizeOp(op)
@@ -206,8 +216,7 @@ export class Operation {
 					break
 				case '1':
 					gate = undefined
-					conditionMask |= 1 << i
-					conditionValue |= 1 << i
+					conditionMask |= conditionValue |= 1 << i
 					break
 				case 'H':
 					needTrig2 = needTrig3 = true
@@ -444,12 +453,7 @@ export class Operation {
 }
 
 // flyweight No-Op
-export const noop = new Operation("")
-noop.transform = () => undefined
-noop.condition = {
-	mask: 0,
-	value: 0,
-}
+export const noop = new Operation(null)
 
 /**
  * Simulates the state of a quantum processor.
@@ -464,15 +468,13 @@ export class Simulator {
 	 *
 	 * @param {int|Simulator} [argument] - number of qubits, or another Simulator
 	 */
-	constructor(argument) {
+	constructor(argument = 0) {
 		if (argument instanceof Simulator) {
 			this.numberOfQubits = argument.numberOfQubits
 			this.amplitudes = argument.amplitudes.slice()
 		} else {
 			this.reset()
-			if (Number.isInteger(argument)) {
-				this.expandState(argument)
-			}
+			this.expandState(argument)
 		}
 	}
 

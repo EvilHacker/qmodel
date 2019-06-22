@@ -7,11 +7,26 @@
 import { Component } from 'react'
 import PropTypes from 'prop-types'
 
+export function easeSinusoidalInOut(t) {
+	return 0.5 * (1 - Math.cos(Math.PI * t))
+}
+
+export function easeQuadraticInOut(t) {
+	return t <= 0.5
+		? 2 * t * t
+		: 2 * t * (2 - t) - 1
+}
+
 export class Transition extends Component {
 	static propTypes = {
 		duration: PropTypes.number.isRequired, // in milliseconds
 		render: PropTypes.func.isRequired,
+		ease: PropTypes.func,
 		onDone: PropTypes.func,
+	}
+
+	static defaultProps = {
+		ease: t => t,
 	}
 
 	state = {
@@ -20,13 +35,13 @@ export class Transition extends Component {
 	}
 
 	shouldComponentUpdate(nextProps, /*nextState*/) {
-		if (this.props.render !== nextProps.render) {
+		if (this.props !== nextProps) {
 			let tween = 0
 			let callback = undefined
 			if (nextProps.duration <= 0) {
 				// transition is done
 				tween = 1
-				callback = this.props.onDone
+				callback = nextProps.onDone
 			}
 			this.setState({
 				startTime: +new Date,
@@ -43,7 +58,7 @@ export class Transition extends Component {
 	componentDidUpdate = this.componentDidMount
 
 	render() {
-		return this.props.render(this.state.tween)
+		return this.props.render(this.props.ease(this.state.tween))
 	}
 
 	nextFrame() {

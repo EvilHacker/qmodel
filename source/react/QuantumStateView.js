@@ -246,7 +246,7 @@ export class StateView extends PureComponent {
 	}
 
 	qubitLabels(n) {
-		const {value, mask} = this.props.condition || {
+		const {mask, value} = this.props.condition || {
 			mask: 0
 		}
 		const gates = this.props.gates || []
@@ -266,9 +266,9 @@ export class StateView extends PureComponent {
 	}
 
 	bitPatterns(n, spacing) {
-		const {value, mask} = this.props.condition || {
+		const {mask, value} = this.props.condition || {
+			mask: -1,
 			value: -1,
-			mask: -1
 		}
 		const result = []
 		for (var i = (1 << n) - 1; i >= 0; --i) {
@@ -287,9 +287,9 @@ export class StateView extends PureComponent {
 	}
 
 	arcs(spacing) {
-		const {value, mask} = this.props.condition || {
+		const {mask, value} = this.props.condition || {
+			mask: 0,
 			value: 0,
-			mask: 0
 		}
 		const {gates} = this.props
 		if (!gates) {
@@ -383,7 +383,7 @@ class BitVectorView extends PureComponent {
 	}
 
 	render() {
-		const {i, value, mask} = this.props
+		const {i, mask, value} = this.props
 
 		let matchMask = 0
 		let className = styles.binary
