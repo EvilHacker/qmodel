@@ -5,15 +5,20 @@
 		"brotli",
 		"browserslist",
 		"camelcase",
+		"compat",
+		"horiz",
 		"linebreak",
 		"memoized",
+		"preact",
 		"qmodel",
 		"qubit",
 		"qubits",
+		"strikethrough",
 		"stylelint",
 		"svgr",
+		"vnode",
 		"xlink",
-		"zopfli",
+		"zopfli"
 	],
 	"files.associations": {
 		".*rc": "json"

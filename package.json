@@ -1,6 +1,6 @@
 {
 	"name": "qmodel",
-	"version": "0.5.3",
+	"version": "0.5.4",
 	"description": "Quantum Programmer's Model",
 	"keywords": [
 		"quantum"
@@ -18,7 +18,8 @@
 	},
 	"dependencies": {
 		"react": "^16.8.6",
-		"react-dom": "^16.8.6"
+		"react-dom": "^16.8.6",
+		"preact": "^8.4.2"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.4.5",
@@ -45,6 +46,10 @@
 		"terser": "^4.0.0",
 		"uglify-js": "^3.6.0",
 		"zopfli-node": "^2.0.3"
+	},
+	"alias": {
+		"react": "./source/react/preact-compat",
+		"react-dom": "./source/react/preact-compat"
 	},
 	"browserslist": [
 		"defaults, last 2 major versions, > 0.2%, not dead"

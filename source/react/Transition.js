@@ -34,19 +34,17 @@ export class Transition extends Component {
 		tween: 0,
 	}
 
-	shouldComponentUpdate(nextProps, /*nextState*/) {
+	shouldComponentUpdate(nextProps, nextState) {
 		if (this.props !== nextProps) {
-			let tween = 0
-			let callback = undefined
+			// note: mutate nextState to be compatible with preact
+			nextState.startTime = +new Date
 			if (nextProps.duration <= 0) {
 				// transition is done
-				tween = 1
-				callback = nextProps.onDone
+				nextState.tween = 1
+				this.setState({}, nextProps.onDone)
+			} else {
+				nextState.tween = 0
 			}
-			this.setState({
-				startTime: +new Date,
-				tween: tween,
-			}, callback)
 		}
 		return true
 	}

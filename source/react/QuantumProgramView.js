@@ -178,6 +178,7 @@ export class QuantumProgramView extends PureComponent {
 
 	onGutterClick = event => {
 		event.preventDefault()
+		event.stopPropagation()
 		const lineNumber = Number(event.target.innerText) - 1
 		this.showGutterMenu(this.state.menuLineNumber == lineNumber
 			? null
@@ -186,8 +187,9 @@ export class QuantumProgramView extends PureComponent {
 
 	onSetNextStatement = event => {
 		event.preventDefault()
-		this.hideGutterMenu()
+		event.stopPropagation()
 		this.setNextLineNumber(this.state.menuLineNumber)
+		this.hideGutterMenu()
 	}
 
 	onDismissError = () => {
