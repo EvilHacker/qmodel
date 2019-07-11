@@ -82,7 +82,8 @@ class App extends PureComponent {
 	}
 
 	onProgramChanged = program => {
-		save("program", this.program = program, 5000)
+		delete this.program
+		save("program", program, 5000)
 	}
 
 	onNumberOfQubits = event => {

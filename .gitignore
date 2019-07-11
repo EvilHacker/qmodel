@@ -1,6 +1,5 @@
 /node_modules
-/build-prod
-/build-dev
+/build-*
 /.cache
 /.vscode/ipch
 /parcel-debug-*.log

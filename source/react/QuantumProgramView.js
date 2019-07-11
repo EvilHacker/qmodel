@@ -4,7 +4,7 @@
  * @license MIT
  */
 
-import React, { PureComponent } from 'react'
+import React, { PureComponent, createRef } from 'react'
 import PropTypes from 'prop-types'
 import { parseRotation } from '../quantum/Rotation'
 import styles from './QuantumProgramView.css'
@@ -23,11 +23,10 @@ export class QuantumProgramView extends PureComponent {
 		onOp: PropTypes.func, // (op: string, rotation: number) => undefined
 		onReset: PropTypes.func, // () => undefined
 		onSettings: PropTypes.func, // () => undefined
-		onProgramChanged: PropTypes.func,  // (program: string) => undefined
+		onProgramChanged: PropTypes.func, // (program: string) => undefined
 	}
 
 	static defaultProps = {
-		defaultValue: "",
 		onOp: () => undefined,
 		onReset: () => undefined,
 		onProgramChanged: () => undefined,
@@ -45,7 +44,7 @@ export class QuantumProgramView extends PureComponent {
 		stepping: false,
 	}
 
-	textArea = React.createRef()
+	textArea = createRef()
 
 	step(direction) {
 		let nextLineNumber = this.state.nextLineNumber

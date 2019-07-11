@@ -10,6 +10,7 @@
  *
  * Changes include:
  * * renaming some html attributes from camelCase to kebab-case
+ * * handle a defaultValue prop (for textarea and select elements)
  * * checking of propTypes in a development build
  * * a PureComponent class
  *
@@ -26,7 +27,7 @@ import {
 	h as createElement,
 	Component as PreactComponent,
 	options
-} from 'preact'
+} from 'preact/dist/preact'
 
 const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip|color|fill|flood|font|glyph|horiz|marker|overline|paint|stop|strikethrough|stroke|text|underline|unicode|units|v|vector|vert|word|writing|x)[A-Z]/
 
@@ -44,14 +45,28 @@ options.vnode = vnode => {
 				}
 			}
 
-			// apply default value (if present)
-			if (props.defaultValue && !props.value && props.value !== 0) {
-				props.value = props.defaultValue
-			}
-
 			// copy onChange to onInput
 			if (props.onChange && !props.onInput) {
 				props.onInput = props.onChange
+			}
+
+			// apply default value when a DOM element is created
+			if (props.defaultValue) {
+				const { defaultValue, ref } = props
+				delete props.defaultValue
+				props.ref = current => {
+					// apply the default value only once
+					if (current && !current.defaultValueApplied) {
+						current.defaultValueApplied = true
+						current.value = defaultValue
+					}
+
+					// set any previous ref
+					if (ref !== undefined) {
+						// note: only object refs (not function refs) are used in this codebase
+						ref.current = current
+					}
+				}
 			}
 		}
 	}
@@ -64,20 +79,16 @@ if (process.env.NODE_ENV === "development") {
 	Component = class Component extends PreactComponent {
 		constructor(props, context) {
 			super(props, context)
-
-			// check prop types
-			if (this.constructor.propTypes) {
-				PropTypes.checkPropTypes(
-					this.constructor.propTypes, props, 'prop', this.constructor.name)
-			}
+			this.checkPropTypes(props)
 		}
 
 		componentWillReceiveProps(nextProps, /*nextContext*/) {
-			// check prop types
-			if (this.constructor.propTypes) {
-				PropTypes.checkPropTypes(
-					this.constructor.propTypes, nextProps, 'prop', this.constructor.name)
-			}
+			this.checkPropTypes(nextProps)
+		}
+
+		checkPropTypes(props) {
+			PropTypes.checkPropTypes(
+				this.constructor.propTypes, props, 'prop', this.constructor.name)
 		}
 	}
 }
