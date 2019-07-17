@@ -74,7 +74,8 @@
 }
 
 .footer svg {
-	height: inherit;
+	width: 26px;
+	height: 26px;
 	fill: #bbb;
 	transition: 0.2s;
 }

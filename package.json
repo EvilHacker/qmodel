@@ -17,6 +17,7 @@
 		"lint": "scripts/lint.sh"
 	},
 	"dependencies": {
+		"mdn-polyfills": "^5.18.0",
 		"preact": "^8.4.2",
 		"react": "^16.8.6",
 		"react-dom": "^16.8.6"
@@ -28,6 +29,7 @@
 		"@svgr/parcel-plugin-svgr": "^4.3.0",
 		"autoprefixer": "^9.6.0",
 		"babel-eslint": "^10.0.2",
+		"babel-plugin-transform-react-jsx": "^6.24.1",
 		"babel-plugin-transform-react-remove-prop-types": "^0.4.24",
 		"brotli-cli": "^0.0.1",
 		"eslint": "^5.16.0",

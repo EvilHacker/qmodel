@@ -23,7 +23,9 @@ parcel build \
 	--no-source-maps \
 	--detailed-report 99 \
 	--out-dir build-prod \
-	source/index.html source/favicon.ico
+	source/index.html \
+	source/polyfills.js \
+	source/favicon.ico
 
 echo
 
@@ -53,7 +55,7 @@ done
 echo
 
 # remove js and css files cuz they have been inlined into html
-find . -type f '(' -name '*.js' -or -name '*.css' ')' -delete || true
+find . -type f -name 'source.????????.*' '(' -name '*.js' -or -name '*.css' ')' -delete || true
 
 # optionally, compress all files
 if [ "$compressionEnabled" ]; then

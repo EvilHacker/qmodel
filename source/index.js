@@ -5,13 +5,16 @@
  */
 
 import styles from './index.css'
-import React, { PureComponent } from 'react'
+import React, { PureComponent, createElement } from 'react'
 import { render } from 'react-dom'
 import { load, save } from './LocalStorage'
 import { QuantumOpTransition } from './react/QuantumOpTransition'
 import { QuantumProgramView } from './react/QuantumProgramView'
 import { Simulator } from './quantum/Simulator'
 import Github from './github.svg'
+
+// create JSX elements with global function h()
+window.h = createElement
 
 const defaultProgram =
 `HHHH,     1/2
@@ -20,7 +23,8 @@ const defaultProgram =
   1-,     1/8
    1,    1/16
 
-${"++-0+,   +1/2\n".repeat(4)}`
+++-0+,   +1/2
+++-0+,   +1/2`
 
 class App extends PureComponent {
 	constructor(props, context) {
@@ -206,13 +210,21 @@ class App extends PureComponent {
 	}
 }
 
-const body = document.body
-const app = body.children[0]
-render(<App/>, app)
+let elementToWaitFor = window
+if (document.documentMode) {
+	// IE browser detected - load polyfills for compatibility
+	elementToWaitFor = document.createElement("script")
+	elementToWaitFor.src = "polyfills.js"
+	document.getElementsByTagName("head")[0].appendChild(elementToWaitFor)
+}
 
-if (process.env.NODE_ENV !== "development") {
-	// remove any injected scripts or advertisements after the app
-	body.onload = () => {
+elementToWaitFor.onload = () => {
+	const body = document.body
+	const app = body.children[0]
+	render(<App/>, app)
+
+	if (process.env.NODE_ENV !== "development") {
+		// remove any injected scripts or advertisements after the app
 		while (body.lastChild !== app) {
 			body.removeChild(body.lastChild)
 		}

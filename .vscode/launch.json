@@ -16,7 +16,7 @@
 			"type": "chrome",
 			"request": "launch",
 			"preLaunchTask": "Start Dev Server",
-			"url": "http://localhost:1234",
+			"url": "http://localhost:1234/index.html",
 			"webRoot": "${workspaceRoot}/source/",
 			"sourceMaps": true,
 		}
