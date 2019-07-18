@@ -39,6 +39,7 @@ export class QuantumProgramView extends PureComponent {
 		errorLineNumber: null, // zero based
 		errorMessage: null,
 		gutterWidth: 0, // in pixels
+		textWidth: 0, // in pixels
 		textHeight: 0, // in pixels
 		verticalScroll: 0, // in pixels
 		stepping: false,
@@ -169,6 +170,7 @@ export class QuantumProgramView extends PureComponent {
 	onUpdateScrollPosition = () => {
 		const textArea = this.textArea.current
 		this.setState({
+			textWidth: textArea.clientWidth,
 			textHeight: textArea.clientHeight,
 			verticalScroll: textArea.scrollTop,
 			stepping: false
@@ -260,7 +262,10 @@ export class QuantumProgramView extends PureComponent {
 					className={styles.errorMessage}
 					style={{
 						top: (errorLineNumber + 1) * lineHeight - verticalScroll + padding,
-						left: gutterWidthPx
+						left: gutterWidthPx,
+						width: this.state.textWidth
+							- this.state.gutterWidth
+							- (2 * padding + 16)
 					}}
 					onClick={this.onDismissError}
 					onContextMenu={this.onDismissError}
