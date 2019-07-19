@@ -22,6 +22,7 @@ else
 	# use "parcel" to serve and monitor source files for changes
 	parcel serve \
 		--out-dir build-dev \
+		--cache-dir .cache/dev \
 		source/index.html \
 		source/polyfills.js
 fi

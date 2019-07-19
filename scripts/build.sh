@@ -23,6 +23,7 @@ parcel build \
 	--no-source-maps \
 	--detailed-report 99 \
 	--out-dir build-prod \
+	--cache-dir .cache/prod \
 	source/index.html \
 	source/polyfills.js \
 	source/favicon.ico
