@@ -24,8 +24,7 @@ then
 		local replace="$1"; shift
 		while [ "$#" -gt 0 ]; do
 			local file="$1"; shift
-			sed "s@$search@$replace@" "$file" > "${file%.*}.patched.${file##*.}"
-			mv "${file%.*}.patched.${file##*.}" "$file"
+			perl -i -pe "s@$search@$replace@" "$file"
 		done
 	}
 
@@ -36,29 +35,27 @@ then
 		' _generateScopedName:' \
 		node_modules/parcel-bundler/src/transforms/postcss.js
 
-	# precomputed source mappings and minified version of "preact" will no longer valid - remove them
-	rm -f node_modules/preact/dist/preact.min.js
-	rm -f node_modules/preact/dist/preact*.map
+	# can't patch pre-minified version of "preact" - remove it to be certain that it is not used
+	rm -f node_modules/preact/dist/preact.min*
+
+	# source mapping included with "preact" are buggy - remove them;
+	# would rather have accurate source mappings to built "dist" code instead
+	find node_modules/preact -type f -name '*.map' -delete
 	searchAndReplace \
 		"//# sourceMappingURL=.*" "" \
-		node_modules/preact/dist/preact*.js
+		node_modules/preact/*.js \
+		node_modules/preact/dist/*js
 
 	# patch "preact" so that textarea children are not diff'ed (for IE and Edge compatability)
 	searchAndReplace \
-		"if (!hydrating \&\& vchildren \&\& " \
-		"if (vnode.nodeName === 'textarea') {} else if ( !hydrating \&\& vchildren \&\& " \
-		node_modules/preact/dist/preact*.js
+		"if \(!hydrating && vchildren && " \
+		"if (vnode.nodeName === 'textarea') {} else if ( !hydrating && vchildren && " \
+		node_modules/preact/dist/preact.*js
 
 	# remove unused exports from "preact"
 	searchAndReplace \
-		"\(createElement\: h,$\)" "// \1 //" \
-		node_modules/preact/dist/preact*.js
-	searchAndReplace \
-		"\(cloneElement: cloneElement,$\)" "// \1 //" \
-		node_modules/preact/dist/preact*.js
-	searchAndReplace \
-		"\(rerender: rerender,$\)" "// \1 //" \
-		node_modules/preact/dist/preact*.js
+		"(createElement|cloneElement|createRef|rerender)(: [a-zA-Z]*,)$" "// \1\2 //" \
+		node_modules/preact/dist/preact.*js
 
 	# update timestamp on this file to indicate when packages were last checked
 	touch node_modules/.installed

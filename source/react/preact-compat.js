@@ -23,11 +23,15 @@
 
 import {
 	render,
-	createRef,
 	h as createElement,
 	Component as PreactComponent,
 	options
-} from 'preact/dist/preact'
+} from 'preact'
+
+if (process.env.NODE_ENV === "development") {
+	// support for React DevTools (https://fb.me/react-devtools/) in browser
+	require('preact/devtools/devtools').initDevTools()
+}
 
 const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip|color|fill|flood|font|glyph|horiz|marker|overline|paint|stop|strikethrough|stroke|text|underline|unicode|units|v|vector|vert|word|writing|x)[A-Z]/
 
@@ -70,6 +74,10 @@ options.vnode = vnode => {
 			}
 		}
 	}
+}
+
+function createRef() {
+	return {}
 }
 
 let Component = PreactComponent
