@@ -67,17 +67,14 @@
 }
 
 .footer a {
-	display: inline-block;
-	height: 26px;
-	padding: 2px;
 	margin-right: 12px;
 }
 
 .footer svg {
-	width: 26px;
-	height: 26px;
+	width: 24px;
+	height: 24px;
 	fill: #bbb;
-	transition: 0.2s;
+	transition: 0.1s;
 }
 
 .footer svg:hover {

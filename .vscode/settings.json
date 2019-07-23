@@ -6,6 +6,8 @@
 		"browserslist",
 		"camelcase",
 		"compat",
+		"devtools",
+		"hnxy",
 		"horiz",
 		"linebreak",
 		"memoized",
