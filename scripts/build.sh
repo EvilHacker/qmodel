@@ -24,7 +24,14 @@ parcel build \
 	--detailed-report 99 \
 	--out-dir build-prod \
 	--cache-dir .cache/prod \
-	source/index.html \
+	source/index.html
+echo
+parcel build \
+	--no-source-maps \
+	--experimental-scope-hoisting \
+	--detailed-report 99 \
+	--out-dir build-prod \
+	--cache-dir .cache/prod \
 	source/polyfills.js \
 	source/favicon.ico
 

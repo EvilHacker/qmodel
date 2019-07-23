@@ -24,5 +24,6 @@ else
 		--out-dir build-dev \
 		--cache-dir .cache/dev \
 		source/index.html \
-		source/polyfills.js
+		source/polyfills.js \
+		source/favicon.ico
 fi

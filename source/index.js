@@ -211,8 +211,8 @@ class App extends PureComponent {
 }
 
 let elementToWaitFor = window
-if (document.documentMode) {
-	// IE browser detected - load polyfills for compatibility
+if (!Object.assign) {
+	// older browser detected - load polyfills for compatibility
 	elementToWaitFor = document.createElement("script")
 	elementToWaitFor.src = "polyfills.js"
 	document.getElementsByTagName("head")[0].appendChild(elementToWaitFor)
