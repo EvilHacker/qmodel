@@ -1,4 +1,7 @@
+const path = require('path');
 const crypto = require('crypto');
+
+const relativeToHere = filename => path.relative(".", filename);
 
 function hash(data) {
 	const digits = "abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ-0123456789";
@@ -22,8 +25,8 @@ module.exports = {
 		},
 		"postcss-modules": {
 			generateScopedName: process.env.NODE_ENV === "development"
-				? (name, filename) => `${name}_${hash(filename)}`
-				: (name, filename) => hash(filename + name)
+				? (name, filename) => `${name}_${hash(relativeToHere(filename))}`
+				: (name, filename) => hash(relativeToHere(filename) + name)
 		}
 	}
 };
