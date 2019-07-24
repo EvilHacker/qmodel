@@ -2,9 +2,11 @@
  * Copyright (c) Mark Suska.
  *
  * @license MIT
+ *
+ * Install only those polyfills needed to make this codebase work
+ * with IE and other older browsers.
  */
 
-// polyfills for compatibility with IE
 import 'mdn-polyfills/Object.assign'
 import 'mdn-polyfills/Object.entries'
 import 'mdn-polyfills/Array.prototype.fill'

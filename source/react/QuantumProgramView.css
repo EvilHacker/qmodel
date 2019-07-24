@@ -5,7 +5,8 @@
  */
 
 .program {
-	font-family: "Courier New", Courier, monospace;
+	/* note: trailing -apple-system font fixes the pointer (➤) appearance in Firefox on Mac OS */
+	font-family: "Courier New", Courier, monospace, -apple-system;
 }
 
 .program td {

@@ -38,7 +38,7 @@ then
 	# can't patch pre-minified version of "preact" - remove it to be certain that it is not used
 	rm -f node_modules/preact/dist/preact.min*
 
-	# source mapping included with "preact" are buggy - remove them;
+	# source mappings included with "preact" are buggy - remove them;
 	# would rather have accurate source mappings to built "dist" code instead
 	find node_modules/preact -type f -name '*.map' -delete
 	searchAndReplace \
