@@ -50,29 +50,28 @@ export class Transition extends Component {
 	}
 
 	componentDidMount() {
-		this.nextFrame()
-	}
-
-	componentDidUpdate = this.componentDidMount
-
-	render() {
-		return this.props.render(this.props.ease(this.state.tween))
-	}
-
-	nextFrame() {
-		if (this.state.tween < 1) {
+		const {state} = this
+		if (state.tween < 1) {
 			requestAnimationFrame(() => {
-				let tween = (+new Date - this.state.startTime) / this.props.duration
+				const {props} = this
+				let tween = (+new Date - state.startTime) / props.duration
 				let callback = undefined
 				if (tween >= 1) {
 					// transition is done
 					tween = 1
-					callback = this.props.onDone
+					callback = props.onDone
 				}
 				this.setState({
 					tween: tween
 				}, callback)
 			})
 		}
+	}
+
+	componentDidUpdate = this.componentDidMount
+
+	render() {
+		const {props} = this
+		return props.render(props.ease(this.state.tween))
 	}
 }

@@ -61,8 +61,11 @@ then
 	touch node_modules/.installed
 fi
 
-# check if any configuration files have changed
-if [ "$(find . -maxdepth 1 '(' -name '.*.js' -or -name '.*rc' ')' -newer node_modules/.installed -print -quit)" ]
+# check if any configuration files, local plugins, or macros have changed
+newer="-newer node_modules/.installed -print -quit"
+if [ "$(find . -type f -maxdepth 1 '(' -name '.*.js' -or -name '.*rc' ')' $newer)" ] \
+	|| [ "$(find modules -type f -path 'modules/babel-plugin-*' $newer)" ] \
+	|| [ "$(find source -type f -name '*.macro.js' $newer)" ]
 then
 	# empty the cache
 	rm -rf .cache || true

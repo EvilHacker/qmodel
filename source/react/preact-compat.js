@@ -9,7 +9,7 @@
  * * the upcoming V10 release of https://github.com/preactjs/preact/releases
  *
  * Changes include:
- * * renaming some html attributes from camelCase to kebab-case
+ * * renaming some SVG attributes from camelCase to kebab-case
  * * handle a defaultValue prop (for textarea and select elements)
  * * checking of propTypes in a development build
  * * a PureComponent class
@@ -19,6 +19,15 @@
  * 		"react": "./source/react/preact-compat",
  * 		"react-dom": "./source/react/preact-compat"
  * 	}
+ *
+ * SVG prop references:
+ * * https://www.w3.org/TR/SVG2/attindex.html
+ * * https://www.w3.org/TR/SVG11/attindex.html
+ * * https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
+ * * https://github.com/Thomazella/react-known-props/tree/master/src/generated
+ *
+ * A thorough list of SVG kebab-case props can be obtained by the shell command:
+ * `./scripts/listSvgKebabProps.sh`
  */
 
 import {
@@ -30,10 +39,8 @@ import {
 
 if (process.env.NODE_ENV === "development") {
 	// support for React DevTools (https://fb.me/react-devtools/) in browser
-	require('preact/devtools/devtools').initDevTools()
+	require('preact-devtools').initDevTools()
 }
-
-const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip|color|fill|flood|font|glyph|horiz|marker|overline|paint|stop|strikethrough|stroke|text|underline|unicode|units|v|vector|vert|word|writing|x)[A-Z]/
 
 options.vnode = vnode => {
 	if (!vnode.normalized) {
@@ -42,10 +49,16 @@ options.vnode = vnode => {
 		if (props && typeof vnode.nodeName === 'string') {
 			// rename specific props from camelCase to kebab-case
 			for (const prop in props) {
-				if (CAMEL_PROPS.test(prop)) {
+				if (/^(?:fill|stroke|text)[A-Z]/.test(prop)) {
 					const value = props[prop]
 					delete props[prop]
-					props[prop.replace(/([A-Z0-9])/, '-$1').toLowerCase()] = value
+					props[prop.replace(/([A-Z])/, '-$1').toLowerCase()] = value
+				} else if (process.env.NODE_ENV === "development") {
+					// in development mode, do a more thorough check
+					const allSvgCamelProps = /^(?:accent|alignment|arabic|aria|baseline|cap|clip|color|dominant|enable|fill|flood|font|glyph|horiz|image|letter|lighting|marker|nav|overline|paint|pointer|rendering|shape|stop|strikethrough|stroke|text|underline|unicode|units|v|vector|vert|word|writing|x)[A-Z]|^panose1/
+					if (allSvgCamelProps.test(prop)) {
+						throw new Error(`Prop '${prop}' likely needs to be renamed to '${prop.replace(/([A-Z0-9])/, '-$1').toLowerCase()}'`)
+					}
 				}
 			}
 
@@ -67,8 +80,13 @@ options.vnode = vnode => {
 
 					// set any previous ref
 					if (ref !== undefined) {
-						// note: only object refs (not function refs) are used in this codebase
-						ref.current = current
+						if (process.env.NODE_ENV === "development" && typeof ref === 'function') {
+							// browser plugins may rely on function refs in development mode
+							ref(current)
+						} else {
+							// only object refs (not function refs) are used in this codebase
+							ref.current = current
+						}
 					}
 				}
 			}
@@ -129,10 +147,11 @@ export {
 	PureComponent
 }
 
-export default {
-	render,
-	createRef,
-	createElement,
-	Component,
-	PureComponent
-}
+// not needed with babel-plugin-transform-import-to-require
+// export default {
+// 	render,
+// 	createRef,
+// 	createElement,
+// 	Component,
+// 	PureComponent
+// }

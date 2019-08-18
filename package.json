@@ -1,6 +1,6 @@
 {
 	"name": "qmodel",
-	"version": "0.5.4",
+	"version": "0.5.5",
 	"description": "Quantum Programmer's Model",
 	"keywords": [
 		"quantum"
@@ -18,17 +18,21 @@
 	},
 	"dependencies": {
 		"mdn-polyfills": "^5.18.0",
-		"preact": "^8.4.2",
+		"preact": "^8.5.1",
 		"react": "^16.8.6",
 		"react-dom": "^16.8.6"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.4.5",
-		"@babel/plugin-proposal-class-properties": "^7.4.4",
+		"@babel/core": "^7.5.5",
+		"@babel/plugin-proposal-class-properties": "^7.5.5",
 		"@babel/preset-react": "^7.0.0",
 		"@svgr/parcel-plugin-svgr": "^4.3.0",
 		"autoprefixer": "^9.6.0",
 		"babel-eslint": "^10.0.2",
+		"babel-plugin-macros": "^2.6.1",
+		"babel-plugin-minify-dead-code-elimination": "^0.5.1",
+		"babel-plugin-minify-type-constructors": "^0.4.3",
+		"babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
 		"babel-plugin-transform-react-jsx": "^6.24.1",
 		"babel-plugin-transform-react-remove-prop-types": "^0.4.24",
 		"brotli-cli": "^0.0.1",
@@ -45,11 +49,12 @@
 		"postcss-modules": "^1.4.1",
 		"stylelint": "^10.1.0",
 		"stylelint-config-standard": "^18.3.0",
-		"terser": "^4.0.0",
 		"uglify-js": "^3.6.0",
 		"zopfli-node": "^2.0.3"
 	},
 	"alias": {
+		"preact": "./node_modules/preact/dist/preact",
+		"preact-devtools": "./node_modules/preact/devtools/devtools",
 		"react": "./source/react/preact-compat",
 		"react-dom": "./source/react/preact-compat"
 	},

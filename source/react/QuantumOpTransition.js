@@ -27,9 +27,10 @@ export class QuantumOpTransition extends PureComponent {
 	}
 
 	render() {
-		const {sim: nextState, directionMode, onDone} = this.props
+		const {props} = this
+		const {sim: nextState, directionMode, onDone} = props
 
-		if (this.props.op === null || this.props.op === noop) {
+		if (props.op === null || props.op === noop) {
 			// no operation to animate
 			return <Transition duration={0} onDone={onDone} render={() => {
 				return <StateView
@@ -39,10 +40,10 @@ export class QuantumOpTransition extends PureComponent {
 			}}/>
 		}
 
-		const op = nextState.compiledOp(this.props.op)
-		const rotation = this.props.rotation
+		const op = nextState.compiledOp(props.op)
+		const rotation = props.rotation
 
-		if (this.props.transitionMode == "simple") {
+		if (props.transitionMode == "simple") {
 			// interpolate between the previous state and the next state
 			const previousState = new Simulator(nextState)
 			previousState.do(op, -rotation)

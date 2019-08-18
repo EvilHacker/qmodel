@@ -4,6 +4,8 @@
  * @license MIT
  */
 
+import c from './codeSnippet.macro'
+
 /**
  * Convert the integer n to a hexadecimal string.
  * Do the conversion only for a "development" build for easier debugging.
@@ -232,7 +234,7 @@ export class Operation {
 				case 'H':
 					needTrig2 = needTrig3 = true
 					tempsNeeded = Math.max(6, tempsNeeded)
-					transform = `
+					transform = c`
 						a = amplitudes[i];
 						b = amplitudes[i | 1];
 						c = amplitudes[i | ${h(2 << i)}];
@@ -249,7 +251,7 @@ export class Operation {
 				case 'N':
 					needTrig2 = true
 					tempsNeeded = Math.max(6, tempsNeeded)
-					transform = `
+					transform = c`
 						a = amplitudes[i];
 						b = amplitudes[i | 1];
 						c = amplitudes[i | ${h(2 << i)}];
@@ -266,7 +268,7 @@ export class Operation {
 				case 'X':
 					needTrig1 = true
 					tempsNeeded = Math.max(4, tempsNeeded)
-					transform = `
+					transform = c`
 						a = amplitudes[i];
 						b = amplitudes[i | 1];
 						c = amplitudes[i | ${h(2 << i)}];
@@ -279,7 +281,7 @@ export class Operation {
 				case 'Y':
 					needTrig1 = true
 					tempsNeeded = Math.max(4, tempsNeeded)
-					transform = `
+					transform = c`
 						a = amplitudes[i];
 						b = amplitudes[i | 1];
 						c = amplitudes[i | ${h(2 << i)}];
@@ -320,7 +322,7 @@ export class Operation {
 			// phase rotation only
 			needTrig1 = true
 			code = this.codeForNestedLoops(
-				((1 << this.length) - 1) & ~conditionMask, `
+				((1 << this.length) - 1) & ~conditionMask, c`
 				a = amplitudes[i];
 				b = amplitudes[i | 1];
 				amplitudes[i]     = a * cos - b * sin;
@@ -328,7 +330,7 @@ export class Operation {
 		}
 
 		// add top-level loop, where i is the index into the amplitudes array
-		code = `
+		code = c`
 			var n = amplitudes.length;
 			for (var i = ${h(conditionValue << 1)}; i < n; i += ${h(2 << this.length)}) {
 				${code}
@@ -337,14 +339,14 @@ export class Operation {
 		// add computation of constant trig values
 		if (needTrig3) {
 			// sin(πr) / √2
-			code = `
+			code = c`
 				var sinHalfOverSqrt2 = sinHalf * Math.SQRT1_2;
 				${code}`
 		}
 		if (needTrig2) {
 			// sin(πr)
 			// cos(πr)
-			code = `
+			code = c`
 				var sinHalf = Math.sin(halfAngle);
 				var cosHalf = Math.cos(halfAngle);
 				${code}`
@@ -352,15 +354,15 @@ export class Operation {
 		if (needTrig1) {
 			// sin(2πr)
 			// cos(2πr)
-			code = `
+			code = c`
 				var sin = Math.sin(2 * halfAngle);
 				var cos = Math.cos(2 * halfAngle);
 				${code}`
 		}
 
 		// finally, define remaining variables used
-		code = `
-			${"var a, b, c, d, e, f".substring(0, tempsNeeded * 3 + 2)};
+		code = c`
+			${"var a,b,c,d,e,f".substring(0, tempsNeeded * 2 + 3)};
 			var halfAngle = Math.PI * rotation;
 			${code}`
 
@@ -404,11 +406,11 @@ export class Operation {
 
 		// merge a decrement of i at end of loop body with increment/decrement done here
 		var decrementAtEndOfBody = 0
-		if (body.endsWith(";//-")) {
+		if (body.endsWith(";;")) {
 			// get the decrement and remove the last statement from the loop body
 			decrementAtEndOfBody = parseInt(
-				body.substring(body.lastIndexOf(" ") + 1, body.length - 4))
-			body = body.substring(0, body.lastIndexOf("\n"))
+				body.substring(body.lastIndexOf("=") + 1, body.length - 2))
+			body = body.substring(0, body.lastIndexOf("i"))
 		}
 
 		const startBit = 2 << startIndex
@@ -417,19 +419,19 @@ export class Operation {
 		// optional optimization - check for small loop to unroll
 		if (bitLength == 1 && body.length < 999) {
 			// unroll small loop
-			return `
+			return c`
 				${body}
 				i += ${h(startBit - decrementAtEndOfBody)};
 				${body}
-				i -= ${h(startBit + decrementAtEndOfBody)};//-`
+				i -= ${h(startBit + decrementAtEndOfBody)};;`
 		}
 
-		return `
+		return c`
 			do {
 				${body}
 				i += ${h(startBit - decrementAtEndOfBody)};
 			} while (i & ${h((endBit - 1) ^ (startBit - 1))});
-			i -= ${h(endBit)};//-`
+			i -= ${h(endBit)};;`
 	}
 
 	/**

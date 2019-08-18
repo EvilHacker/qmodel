@@ -39,14 +39,12 @@ echo
 
 cd build-prod
 
-# minify all js files even more
+# add Babel runtime helpers and minify all js files even more
 echo "⚙️  Minifying all js files."
 find . -type f -name '*.js' | cut -c 3- | while read -r file; do
-	# this sequence minifies js well
 	echo "╰── $file"
-	terser "$file" --compress passes=1 --mangle \
-		| uglifyjs --compress passes=2 --mangle \
-		| uglifyjs --compress passes=2 -o "$file"
+	cat ../modules/babel-plugin-transform-helpers/src/helpers.js "$file" \
+		| uglifyjs --compress --mangle --toplevel -o "$file"
 done
 
 echo
@@ -93,7 +91,7 @@ if [ "$compressionEnabled" ]; then
 
 		# compress to .br
 		if [ "$(which brotli-cli 2>/dev/null)" != "" ]; then
-			brotliOutput="$(brotli-cli "$file")"
+			local brotliOutput="$(brotli-cli "$file")"
 			if [ "$brotliOutput" != "Processed 1 files" ] || [ ! -f "$file.br" ]; then
 				echo "$brotliOutput" >&2
 				exit 1

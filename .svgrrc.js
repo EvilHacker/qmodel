@@ -15,9 +15,8 @@ module.exports = {
 		},
 	},
 	template: ({ template }, opts, { componentName, jsx }) => template.ast`
-		exports.__esModule = true
 		const svg = ${jsx}
-		exports.default = function ${componentName}() {
+		module.exports = function ${componentName}() {
 			return svg
 		}`,
 }

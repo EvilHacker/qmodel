@@ -28,7 +28,10 @@ module.exports = {
 	"rules": {
 		// Javascript
 		"linebreak-style": [ "error", "unix" ],
-		"indent": [ "error", "tab", { "SwitchCase": 1 } ],
+		"indent": [ "error", "tab", {
+			"SwitchCase": 1,
+			"ignoredNodes": [ "TemplateLiteral" ]
+		} ],
 		"no-trailing-spaces": "warn",
 		"camelcase": "warn",
 		"curly": "warn",
@@ -38,7 +41,11 @@ module.exports = {
 		"dot-notation": "warn",
 		"dot-location": [ "warn", "property" ],
 		"no-unused-vars": "warn",
-		"no-use-before-define": [ "error", { "variables": true, "functions": false, "classes": false } ],
+		"no-use-before-define": [ "error", {
+			"variables": true,
+			"functions": false,
+			"classes": false
+		} ],
 		"consistent-return": "error",
 		"prefer-const": "warn",
 		"no-eval": "error",

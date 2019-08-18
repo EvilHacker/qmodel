@@ -48,7 +48,8 @@ export class QuantumProgramView extends PureComponent {
 	textArea = createRef()
 
 	step(direction) {
-		let nextLineNumber = this.state.nextLineNumber
+		const {state} = this
+		let nextLineNumber = state.nextLineNumber
 		if (direction < 0) {
 			nextLineNumber += direction
 			if (nextLineNumber < 0) {
@@ -56,7 +57,7 @@ export class QuantumProgramView extends PureComponent {
 				return
 			}
 		}
-		const lines = this.state.programLines
+		const lines = state.programLines
 		if (nextLineNumber >= lines.length) {
 			// stepping forward at end of program - don't do anything
 			return
@@ -142,10 +143,6 @@ export class QuantumProgramView extends PureComponent {
 		this.setNextLineNumber(0)
 	}
 
-	onSettings = () => {
-		this.props.onSettings()
-	}
-
 	onUpdateProgramText = () => {
 		const program = this.textArea.current.value
 		const lines = program.split(/\r|\r\n|\n/)
@@ -206,11 +203,20 @@ export class QuantumProgramView extends PureComponent {
 	}
 
 	render() {
+		const {props, state} = this
+		const {
+			programLines,
+			nextLineNumber,
+			errorLineNumber,
+			menuLineNumber,
+			gutterWidth,
+			textWidth,
+			verticalScroll,
+		} = state
 		const fontSizePx = `${fontSize}px`
 		const lineHeightPx = `${lineHeight}px`
-		const gutterWidthPx = `${this.state.gutterWidth}px`
-		const textHeightPx = `${this.state.textHeight}px`
-		const {programLines, nextLineNumber, errorLineNumber, menuLineNumber, verticalScroll, stepping} = this.state
+		const gutterWidthPx = `${gutterWidth}px`
+		const textHeightPx = `${state.textHeight}px`
 
 		// next operation pointer
 		const gutterContent = [
@@ -219,7 +225,7 @@ export class QuantumProgramView extends PureComponent {
 				className={styles.pointer}
 				style={{
 					top: nextLineNumber * lineHeight - verticalScroll + padding,
-					transition: stepping && "0.2s"
+					transition: state.stepping && "0.2s"
 				}}
 			>
 				➤
@@ -263,14 +269,12 @@ export class QuantumProgramView extends PureComponent {
 					style={{
 						top: (errorLineNumber + 1) * lineHeight - verticalScroll + padding,
 						left: gutterWidthPx,
-						width: this.state.textWidth
-							- this.state.gutterWidth
-							- (2 * padding + 16)
+						width: textWidth - gutterWidth - (2 * padding + 16)
 					}}
 					onClick={this.onDismissError}
 					onContextMenu={this.onDismissError}
 				>
-					{this.state.errorMessage}
+					{state.errorMessage}
 				</div>
 			</>
 		}
@@ -308,9 +312,9 @@ export class QuantumProgramView extends PureComponent {
 							<Reset/>
 						</button>
 					</td>
-					{this.props.onSettings &&
+					{props.onSettings &&
 						<td align="right">
-							<button className={styles.button} onClick={this.onSettings}>
+							<button className={styles.button} onClick={props.onSettings}>
 								<div style={{transform: "rotate(18deg)"}}><Cog/></div>
 							</button>
 						</td>
@@ -327,12 +331,12 @@ export class QuantumProgramView extends PureComponent {
 							autoCorrect="off"
 							autoCapitalize="off"
 							spellCheck="false"
-							defaultValue={this.props.defaultValue}
+							defaultValue={props.defaultValue}
 							style={{
 								lineHeight: lineHeightPx,
 								fontSize: fontSizePx,
 								padding: padding,
-								paddingLeft: this.state.gutterWidth + characterWidth,
+								paddingLeft: state.gutterWidth + characterWidth,
 							}}
 							onChange={this.onUpdateProgramText}
 							onScroll={this.onUpdateScrollPosition}

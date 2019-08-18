@@ -14,6 +14,16 @@ const desiredWidth = 1337 + 178
 const height = 514
 const axleY = 218
 
+// SVG defs
+const svgWheelId = styles.wheel
+const svgWheelRef = `#${svgWheelId}`
+const svgAxleId = styles.axle
+const svgAxleRef = `#${svgAxleId}`
+const svgVerticalGuideId = styles.verticalGuide
+const svgVerticalGuideRef = `#${svgVerticalGuideId}`
+const svgDirectionWheelId = styles.directionWheel
+const svgDirectionWheelRef = `#${svgDirectionWheelId}`
+
 export class StateView extends PureComponent {
 	static propTypes = {
 		amplitudes: PropTypes.arrayOf(PropTypes.number).isRequired,
@@ -30,124 +40,21 @@ export class StateView extends PureComponent {
 	}
 
 	render() {
-		const numberOfWheels = this.props.amplitudes.length >> 1
+		const {props} = this
+		const numberOfWheels = props.amplitudes.length >> 1
 		const n = Math.log2(numberOfWheels)
 		const spacing = Math.max(minSpacing,
 			Math.min(maxSpacing, (desiredWidth - 178) / (numberOfWheels + 1)))
 		const width = (numberOfWheels + 1) * spacing + 178
 		const textTop = height - 52 - 14 * n
-		const directions = this.props.directionMode == "complex"
-			? [ "+1", "-1", "-𝑖", "+𝑖" ]
-			: [ "N", "S", "E", "W" ]
 
-		return <div width="100%" className={styles.quantumState}>
+		return <div className={styles.quantumState}>
 			<svg className={styles.wheels} width={width} height={height}>
-				<defs>
-					<g id={styles.wheel}>
-						<path
-							// 3 minor spokes
-							d="M0,0L-102.858842079721,-5.390603493023-102.858842079721,5.390603493023zM-5.390603493023,102.858842079721 5.390603493023,102.858842079721L-5.390603493023,-102.858842079721 5.390603493023,-102.858842079721z"
-							fill="#333"
-						/>
-						<circle
-							r="100"
-							stroke="#000"
-							strokeWidth="6"
-							fill="#abd"
-							fillOpacity="0.66"
-						/>
-						<path
-							// main directional wedge
-							d="M0,0L100.749202875582,-21.414904154229 100.749202875582,21.414904154229z"
-							fill="#f44"
-						/>
-						<path
-							// main directional spoke
-							d="M0,0L102.858842079721,-5.390603493023 102.858842079721,5.390603493023z"
-							fill="#c00"
-						/>
-						<path
-							// arc of the main directional wedge
-							d="M97.814760073381,20.791169081776A100,100 0 0,0 97.814760073381,-20.791169081776"
-							stroke="#c00"
-							strokeWidth="6.2"
-						/>
-					</g>
-
-					<g id={styles.axle}>
-						<line
-							// axle in-between two wheels
-							x1="2" x2={spacing - 2}
-							stroke="#444"
-							strokeOpacity="0.25"
-							strokeWidth="4"
-							strokeLinecap="round"
-						/>
-					</g>
-
-					<g id={styles.verticalGuide}>
-						<line
-							// faint dotted vertical line from wheel to binary bit pattern
-							y1="4" y2={textTop - axleY}
-							stroke="#444"
-							strokeOpacity="0.25"
-							strokeWidth="1"
-							strokeLinecap="round"
-							strokeDasharray="5,5"
-						/>
-					</g>
-
-					<g id={styles.directionWheel}>
-						<circle r="58" stroke="#622" strokeWidth="1" fill="none" />
-						<circle r="65" stroke="#622" strokeWidth="2" fill="none" />
-						<path
-							d="M40.3,40.3L47,47M-40.3,40.3L-47,47M40.3,-40.3L47,-47M-40.3,-40.3L-47,-47"
-							stroke="#622"
-							strokeWidth="2"
-							strokeLinecap="round"
-						/>
-						<path
-							d="M0,0L7,7L0,83L-7,7L-83,0L-7,-7L0,-83L7,-7z"
-							fill="#dc8"
-							stroke="#762"
-						/>
-						<path
-							d="M0,0L7,-7L83,0L7,7z"
-							fill="#d44"
-							stroke="#900"
-						/>
-						<circle r="3" fill="#533" />
-						<text
-							fill="#d44"
-							textAnchor="middle"
-							transform="translate(82)rotate(90)"
-						>
-							{directions[0]}
-						</text>
-						<text
-							fill="#211"
-							textAnchor="middle"
-							transform="translate(-82)rotate(-90)"
-						>
-							{directions[1]}
-						</text>
-						<text
-							fill="#211"
-							textAnchor="middle"
-							transform="translate(0,82)rotate(180)"
-						>
-							{directions[2]}
-						</text>
-						<text
-							fill="#211"
-							textAnchor="middle"
-							transform="translate(0,-82)"
-						>
-							{directions[3]}
-						</text>
-					</g>
-				</defs>
-
+				<SvgDefs
+					spacing={spacing}
+					textTop={textTop}
+					directionMode={props.directionMode}
+				/>
 				{this.wheels(spacing)}
 			</svg>
 
@@ -239,7 +146,7 @@ export class StateView extends PureComponent {
 					strokeLinecap="round"
 				/>
 				<use
-					xlinkHref={`#${styles.directionWheel}`}
+					xlinkHref={svgDirectionWheelRef}
 					transform={`translate(${compassX} ${axleY})skewY(${circleSkewY})scale(${2 * circleScaleX} 2)rotate(${rotationDegrees})`}
 				/>
 			</g>
@@ -249,10 +156,11 @@ export class StateView extends PureComponent {
 	}
 
 	qubitLabels(n) {
-		const {mask, value} = this.props.condition || {
+		const {props} = this
+		const {mask, value} = props.condition || {
 			mask: 0
 		}
-		const gates = this.props.gates || []
+		const gates = props.gates || []
 		const bits = []
 		for (var b = 0; b < n; ++b) {
 			bits.push(
@@ -290,17 +198,18 @@ export class StateView extends PureComponent {
 	}
 
 	arcs(spacing) {
-		const {mask, value} = this.props.condition || {
-			mask: 0,
-			value: 0,
-		}
-		const {gates} = this.props
+		const {props} = this
+		const {gates} = props
 		if (!gates) {
 			return undefined
 		}
+		const {mask, value} = props.condition || {
+			mask: 0,
+			value: 0,
+		}
 
 		const result = []
-		const n = this.props.amplitudes.length / 2
+		const n = props.amplitudes.length / 2
 		for (var b = 0; b < gates.length; ++b) {
 			const gate = gates[b]
 			if (gate) {
@@ -343,6 +252,121 @@ export class StateView extends PureComponent {
 	}
 }
 
+class SvgDefs extends PureComponent {
+	static propTypes = {
+		spacing: PropTypes.number.isRequired,
+		textTop: PropTypes.number.isRequired,
+		directionMode: PropTypes.oneOf(["compass", "complex"]),
+	}
+
+	render() {
+		const {props} = this
+		const directions = props.directionMode == "complex"
+			? [ "+1", "-1", "-𝑖", "+𝑖" ]
+			: [ "N", "S", "E", "W" ]
+
+		return <defs>
+			<g id={svgWheelId}>
+				<path
+					// 3 minor spokes
+					d="M0,0L-99,-5-99,5zM-5,99 5,99-5,-99 5,-99z"
+					fill="#333"
+				/>
+				<circle
+					r="100"
+					stroke="#000"
+					strokeWidth="6"
+					fill="#abd"
+					fillOpacity="0.66"
+				/>
+				<path
+					// main directional wedge
+					d="M0,0L99,-21 99,21z"
+					fill="#f44"
+				/>
+				<path
+					// main directional spoke
+					d="M0,0L99,-5 99,5z"
+					fill="#c00"
+				/>
+				<path
+					// arc of the main directional wedge
+					d="M97.81,20.79A100,100 0 0,0 97.81,-20.79"
+					stroke="#c00"
+					strokeWidth="6.2"
+				/>
+			</g>
+
+			<g id={svgAxleId}>
+				<line
+					// axle in-between two wheels
+					x1="2" x2={props.spacing - 2}
+					stroke="#444"
+					strokeOpacity="0.25"
+					strokeWidth="4"
+					strokeLinecap="round"
+				/>
+			</g>
+
+			<g id={svgVerticalGuideId}>
+				<line
+					// faint dotted vertical line from wheel to binary bit pattern
+					y1="4" y2={props.textTop - axleY}
+					stroke="#444"
+					strokeOpacity="0.25"
+					strokeLinecap="round"
+					strokeDasharray="4,8"
+				/>
+			</g>
+
+			<g id={svgDirectionWheelId} textAnchor="middle" fill="#211">
+				<g stroke="#622" fill="none" /* group constant elements */ >
+					<circle r="58" />
+					<circle r="65" strokeWidth="2" />
+					<path
+						d="M40.3,40.3L47,47M-40.3,40.3L-47,47M40.3,-40.3L47,-47M-40.3,-40.3L-47,-47"
+						stroke="#622"
+						strokeWidth="2"
+						strokeLinecap="round"
+					/>
+					<path
+						d="M0,0L7,7L0,83L-7,7L-83,0L-7,-7L0,-83L7,-7z"
+						fill="#dc8"
+						stroke="#762"
+					/>
+					<path
+						d="M0,0L7,-7L83,0L7,7z"
+						fill="#d44"
+						stroke="#900"
+					/>
+					<circle r="3" fill="#533" />
+				</g>
+				<text
+					fill="#d44"
+					transform="translate(82)rotate(90)"
+				>
+					{directions[0]}
+				</text>
+				<text
+					transform="translate(-82)rotate(-90)"
+				>
+					{directions[1]}
+				</text>
+				<text
+					transform="translate(0,82)rotate(180)"
+				>
+					{directions[2]}
+				</text>
+				<text
+					transform="translate(0,-82)"
+				>
+					{directions[3]}
+				</text>
+			</g>
+		</defs>
+	}
+}
+
 class WheelView extends PureComponent {
 	static propTypes = {
 		i: PropTypes.number.isRequired,
@@ -356,20 +380,21 @@ class WheelView extends PureComponent {
 	}
 
 	render() {
-		const {a, b} = this.props
+		const {props} = this
+		const {a, b} = props
 		const radius = 2 * Math.sqrt(a*a + b*b)
-		const x = (this.props.i + 1) * this.props.spacing + 54
+		const x = (props.i + 1) * props.spacing + 54
 		return <g>
 			{radius > 0.005 && <use
-				xlinkHref={`#${styles.wheel}`}
-				transform={`translate(${x} ${axleY}) skewY(${this.props.circleSkewY}) scale(${radius * this.props.circleScaleX} ${radius}) rotate(${-180 / Math.PI * Math.atan2(b, a) + this.props.rotationDegrees})`}
+				xlinkHref={svgWheelRef}
+				transform={`translate(${x} ${axleY}) skewY(${props.circleSkewY}) scale(${radius * props.circleScaleX} ${radius}) rotate(${-180 / Math.PI * Math.atan2(b, a) + props.rotationDegrees})`}
 			/>}
 			<use
-				xlinkHref={`#${styles.axle}`}
-				transform={`translate(${x} ${axleY}) skewX(${this.props.axleSkewX})`}
+				xlinkHref={svgAxleRef}
+				transform={`translate(${x} ${axleY}) skewX(${props.axleSkewX})`}
 			/>
 			<use
-				xlinkHref={`#${styles.verticalGuide}`}
+				xlinkHref={svgVerticalGuideRef}
 				transform={`translate(${x} ${axleY})`}
 			/>
 		</g>
@@ -386,7 +411,7 @@ class BitVectorView extends PureComponent {
 	}
 
 	render() {
-		const {i, mask, value} = this.props
+		const {i, n, mask, value, spacing} = this.props
 
 		let matchMask = 0
 		let className = styles.binary
@@ -395,7 +420,6 @@ class BitVectorView extends PureComponent {
 			className = `${className} ${styles.select}`
 		}
 
-		const n = this.props.n
 		const bits = []
 		for (var b = 0; b < n; ++b) {
 			const bit = (i >> b) & 1
@@ -412,7 +436,6 @@ class BitVectorView extends PureComponent {
 			)
 		}
 
-		const spacing = this.props.spacing
 		const width = Math.max(minSpacing, spacing - 4)
 		const margin = (spacing - width) >> 1
 		const fontSize = Math.max(14, 20 - n)

@@ -15,7 +15,7 @@ if (!Object.entries) {
 elementToWaitFor.onload = () => {
 	const React = require('react')
 
-	// create JSX elements with global function h()
+	// create JSX elements with global function h() (as configured in .babelrc.js)
 	window.h = React.createElement
 
 	// render the application

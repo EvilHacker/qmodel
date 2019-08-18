@@ -1,0 +1,14 @@
+{
+	"name": "babel-plugin-transform-helpers",
+	"version": "0.0.1",
+	"description": "Inline or reference shared Babel runtime helper functions",
+	"keywords": [
+		"babel-plugin"
+	],
+	"author": "Mark Suska <mark.suska@me.com>",
+	"license": "MIT",
+	"main": "src/index.js",
+	"peerDependencies": {
+		"@babel/core": "^7.5.5"
+	}
+}

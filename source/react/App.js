@@ -51,19 +51,23 @@ export class App extends PureComponent {
 		if (op.minLength > maxQubits) {
 			throw `${op.minLength} qubits is more than max of ${maxQubits}`
 		}
+
 		this.sim.do(op, rotation)
+
+		const {state} = this
 		this.setState({
-			count: this.state.count + 1,
+			count: state.count + 1,
 			op: op,
 			rotation: rotation,
-			transitionMode: this.state.nextTransitionMode
+			transitionMode: state.nextTransitionMode
 		})
 	}
 
 	onReset = () => {
-		this.sim = new Simulator(this.state.numberOfQubits)
+		const {state} = this
+		this.sim = new Simulator(state.numberOfQubits)
 		this.setState({
-			count: this.state.count + 1,
+			count: state.count + 1,
 			op: undefined,
 			rotation: 0,
 			showSettings: false
@@ -117,8 +121,9 @@ export class App extends PureComponent {
 	}
 
 	render() {
+		const {state} = this
 		let settings = undefined
-		if (this.state.showSettings) {
+		if (state.showSettings) {
 			settings = <div className={styles.settings} onDoubleClick={this.onSettings}>
 				<table>
 					<tbody>
@@ -126,7 +131,7 @@ export class App extends PureComponent {
 							<td>Qubits:</td>
 							<td>
 								<select
-									value={this.state.numberOfQubits}
+									value={state.numberOfQubits}
 									onChange={this.onNumberOfQubits}
 								>
 									{Array(maxQubits).fill().map((_, i) =>
@@ -138,7 +143,7 @@ export class App extends PureComponent {
 							<td>Directions:</td>
 							<td>
 								<select
-									value={this.state.directionMode}
+									value={state.directionMode}
 									onChange={this.onDirectionMode}
 								>
 									<option value="compass">Compass N/S/E/W</option>
@@ -150,7 +155,7 @@ export class App extends PureComponent {
 							<td>Transition:</td>
 							<td>
 								<select
-									value={this.state.nextTransitionMode}
+									value={state.nextTransitionMode}
 									onChange={this.onTransitionMode}
 								>
 									<option value="simple">Simple</option>
@@ -170,10 +175,10 @@ export class App extends PureComponent {
 			<div className={styles.quantumState}>
 				<QuantumOpTransition
 					sim={this.sim}
-					op={this.state.op}
-					rotation={this.state.rotation}
-					directionMode={this.state.directionMode}
-					transitionMode={this.state.transitionMode}
+					op={state.op}
+					rotation={state.rotation}
+					directionMode={state.directionMode}
+					transitionMode={state.transitionMode}
 					onDone={this.onDone}
 				/>
 			</div>

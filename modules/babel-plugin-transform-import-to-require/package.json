@@ -1,0 +1,14 @@
+{
+	"name": "babel-plugin-transform-import-to-require",
+	"version": "0.0.1",
+	"description": "Replaces import statements with require() calls",
+	"keywords": [
+		"babel-plugin"
+	],
+	"author": "Mark Suska <mark.suska@me.com>",
+	"license": "MIT",
+	"main": "src/index.js",
+	"peerDependencies": {
+		"@babel/core": "^7.5.5"
+	}
+}
