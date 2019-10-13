@@ -1,7 +1,7 @@
 {
-	"name": "babel-plugin-transform-import-to-require",
+	"name": "babel-plugin-transform-inline-helpers",
 	"version": "0.0.1",
-	"description": "Replaces import statements with require() calls",
+	"description": "Inline or import and call shared Babel runtime helper functions",
 	"keywords": [
 		"babel-plugin"
 	],
@@ -9,6 +9,6 @@
 	"license": "MIT",
 	"main": "src/index.js",
 	"peerDependencies": {
-		"@babel/core": "^7.5.5"
+		"@babel/core": "^7.6.0"
 	}
 }

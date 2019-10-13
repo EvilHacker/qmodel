@@ -255,7 +255,7 @@ export class QuantumProgramView extends PureComponent {
 		// error message (if any)
 		let error = undefined
 		if (errorLineNumber !== null) {
-			error = <>
+			error = <div>
 				<div
 					className={styles.errorHighlight}
 					style={{
@@ -276,7 +276,7 @@ export class QuantumProgramView extends PureComponent {
 				>
 					{state.errorMessage}
 				</div>
-			</>
+			</div>
 		}
 
 		// pop-up menu (if shown)

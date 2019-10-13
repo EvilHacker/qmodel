@@ -13,12 +13,10 @@
  * * handle a defaultValue prop (for textarea and select elements)
  * * checking of propTypes in a development build
  * * a PureComponent class
+ * * support for Fragments
  *
- * To switch to react, remove these entries from package.json:
- * 	"alias": {
- * 		"react": "./source/react/preact-compat",
- * 		"react-dom": "./source/react/preact-compat"
- * 	}
+ * To switch to react, change this line in .rollup.config.js:
+ * `const react = "preact" // select "preact" or "react"`
  *
  * SVG prop references:
  * * https://www.w3.org/TR/SVG2/attindex.html
@@ -37,10 +35,10 @@ import {
 	options
 } from 'preact'
 
-if (process.env.NODE_ENV === "development") {
-	// support for React DevTools (https://fb.me/react-devtools/) in browser
-	require('preact-devtools').initDevTools()
-}
+// DEVELOPMENT_ONLY_START
+import 'preact-devtools' // support for React DevTools (https://fb.me/react-devtools/) in browser
+import PropTypes from 'prop-types'
+// DEVELOPMENT_ONLY_END
 
 options.vnode = vnode => {
 	if (!vnode.normalized) {
@@ -57,7 +55,8 @@ options.vnode = vnode => {
 					// in development mode, do a more thorough check
 					const allSvgCamelProps = /^(?:accent|alignment|arabic|aria|baseline|cap|clip|color|dominant|enable|fill|flood|font|glyph|horiz|image|letter|lighting|marker|nav|overline|paint|pointer|rendering|shape|stop|strikethrough|stroke|text|underline|unicode|units|v|vector|vert|word|writing|x)[A-Z]|^panose1/
 					if (allSvgCamelProps.test(prop)) {
-						throw new Error(`Prop '${prop}' likely needs to be renamed to '${prop.replace(/([A-Z0-9])/, '-$1').toLowerCase()}'`)
+						throw new Error(`Prop '${prop}' likely needs to be renamed to '${
+							prop.replace(/([A-Z0-9])/, '-$1').toLowerCase()}'`)
 					}
 				}
 			}
@@ -101,7 +100,6 @@ function createRef() {
 let Component = PreactComponent
 if (process.env.NODE_ENV === "development") {
 	// in development mode, create a subclass that will check prop types
-	const PropTypes = require('prop-types')
 	Component = class Component extends PreactComponent {
 		constructor(props, context) {
 			super(props, context)
@@ -139,19 +137,22 @@ class PureComponent extends Component {
 	}
 }
 
+const Fragment = "x-fragment"
+
 export {
 	render,
 	createRef,
 	createElement,
 	Component,
-	PureComponent
+	PureComponent,
+	Fragment,
 }
 
-// not needed with babel-plugin-transform-import-to-require
-// export default {
-// 	render,
-// 	createRef,
-// 	createElement,
-// 	Component,
-// 	PureComponent
-// }
+export default {
+	render,
+	createRef,
+	createElement,
+	Component,
+	PureComponent,
+	Fragment,
+}

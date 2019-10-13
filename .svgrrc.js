@@ -1,12 +1,13 @@
 module.exports = {
 	expandProps: false,
 	dimensions: false,
-	prettier: process.env.NODE_ENV === "development",
+	prettier: false,
+	svgo: false,
 	jsx: {
 		babelConfig: {
 			plugins: [
 				[
-					"transform-react-jsx",
+					"@babel/transform-react-jsx",
 					{
 						pragma: "h"
 					}
@@ -15,8 +16,10 @@ module.exports = {
 		},
 	},
 	template: ({ template }, opts, { componentName, jsx }) => template.ast`
-		const svg = ${jsx}
-		module.exports = function ${componentName}() {
-			return svg
-		}`,
+		import {createElement as h} from 'react'
+		const jsx = ${jsx}
+		export default function ${componentName}() {
+			return jsx
+		}
+	`,
 }

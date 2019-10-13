@@ -6,12 +6,16 @@
 
 import c from './codeSnippet.macro'
 
+// DEVELOPMENT_ONLY_START
+import { js_beautify as beautify } from 'js-beautify/js/lib/beautify'
+// DEVELOPMENT_ONLY_END
+
 /**
  * Convert the integer n to a hexadecimal string.
  * Do the conversion only for a "development" build for easier debugging.
  *
  * @param {number} n - a positive integer
- * @returns {number|string}
+ * @returns {number|string} - hexadecimal representation
  */
 function h(n) {
 	if (process.env.NODE_ENV === "development") {
@@ -62,10 +66,8 @@ export function normalizeOp(op) {
 				normOp += '-'
 				break
 			case '0':
-				normOp += '0'
-				break
 			case '1':
-				normOp += '1'
+				normOp += op[i]
 				break
 			case 'H':
 			case 'h':
@@ -368,7 +370,7 @@ export class Operation {
 
 		if (process.env.NODE_ENV === "development") {
 			// pretty-print the generated code for easier debugging
-			code = require('js-beautify') (code, {
+			code = beautify(code, {
 				indent_level: 1,         // eslint-disable-line camelcase
 				indent_with_tabs: true,  // eslint-disable-line camelcase
 				preserve_newlines: false // eslint-disable-line camelcase

@@ -11,14 +11,22 @@
 			//  - "Debugger for Chrome" Visual Studio Code extension
 			//    (https://marketplace.visualstudio.com/items?itemName=msjsdiag.debugger-for-chrome)
 			//  - React DevTools Chrome extension (optional)
-			//    (https://fb.me/react-devtools/)
+			//    (https://fb.me/react-devtools/ – latest may not always work)
+			//    (https://github.com/facebook/react-devtools/releases – v3.4.2 works)
 			"name": "Run in Chrome",
 			"type": "chrome",
 			"request": "launch",
 			"preLaunchTask": "Start Dev Server",
 			"url": "http://localhost:1234/index.html",
-			"webRoot": "${workspaceRoot}/source/",
+			"webRoot": "${workspaceRoot}/build-dev/",
 			"sourceMaps": true,
+		},
+		{
+			"name": "Run Current JS File",
+			"type": "node",
+			"request": "launch",
+			"program": "${file}",
+			"cwd": "${workspaceFolder}",
 		}
 	]
 }

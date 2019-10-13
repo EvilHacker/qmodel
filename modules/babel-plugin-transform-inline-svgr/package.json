@@ -1,7 +1,7 @@
 {
-	"name": "babel-plugin-transform-helpers",
+	"name": "babel-plugin-transform-inline-svgr",
 	"version": "0.0.1",
-	"description": "Inline or reference shared Babel runtime helper functions",
+	"description": "Inline function calls to imported svg files",
 	"keywords": [
 		"babel-plugin"
 	],
@@ -9,6 +9,6 @@
 	"license": "MIT",
 	"main": "src/index.js",
 	"peerDependencies": {
-		"@babel/core": "^7.5.5"
+		"@babel/core": "^7.6.0"
 	}
 }

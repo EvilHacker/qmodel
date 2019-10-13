@@ -1,62 +1,64 @@
+const isDev = process.env.NODE_ENV === "development"
+const isProd = !isDev
+
 module.exports = {
 	presets: [
-		"@babel/preset-env",
-		"@babel/preset-react",
+		[
+			"@babel/preset-env",
+			{
+				loose: isProd,
+			}
+		],
+		[
+			"@babel/preset-react",
+			{
+				// the following import is automatically injected into all scripts using React:
+				// 	import {createElement as React$createElement, Fragment as React$Fragment} from 'react'
+				pragma: "React$createElement",
+				pragmaFrag: "React$Fragment",
+			}
+		],
 	],
 	plugins: [
 		// Javascript language features
 		"macros", // compile-time AST manipulation
 		"@babel/proposal-class-properties", // static class variables
 
-		// optimization/minification for both dev and prod so that behaviour is identical
-		`${__dirname}/modules/babel-plugin-transform-import-to-require`,
-		"@babel/transform-react-constant-elements",
-		[
-			"transform-react-jsx",
-			{
-				// create JSX elements with global function h() (set in index.js)
-				pragma: "h"
-			}
-		],
-		[
-			"@babel/transform-template-literals",
-			{
-				// `a${b}c` -> "a" + b + "c"
-				loose: true,
-			},
-			"loose"
-		],
-		"minify-type-constructors",
-	],
-	env: {
-		production: {
-			plugins: [
-				// inline or call "loose" Babel runtime helper functions
-				`${__dirname}/modules/babel-plugin-transform-helpers`,
+		// extra optimizations only for a production build
+		...isProd ? [
+			// inline some Babel runtime helper functions
+			[
+				`${__dirname}/modules/babel-plugin-transform-inline-helpers`,
+				{
+					useRollupHelpers: true,
+					expectedHelpers: isProd ? [
+						// these are the only helpers expected in a production build
+						"assertThisInitialized", // inlined noop
+						"defineProperty", // inlined
+						"inheritsLoose",
+					] : undefined
+				}
+			],
 
-				// remove unnecessary runtime overhead that should only be present in a development build
-				[
-					"transform-es2015-modules-commonjs",
-					{
-						loose: true,
-						strict: false,
-					}
-				],
-				[
-					"@babel/transform-classes",
-					{
-						loose: true,
-					}
-				],
-				[
-					"transform-react-remove-prop-types",
-					{
-						mode: "remove",
-						removeImport: true,
-					}
-				],
-				"babel-plugin-minify-dead-code-elimination",
-			]
+			// remove runtime prop type checks
+			[
+				"transform-react-remove-prop-types",
+				{
+					mode: "remove",
+					removeImport: true,
+				}
+			],
+
+			// optimization - inline imported svg files
+			`${__dirname}/modules/babel-plugin-transform-inline-svgr`,
+
+			// optimization
+			"minify-dead-code-elimination",
+		] : [],
+	],
+	generatorOpts: {
+		jsescOption: { // cspell: disable-line
+			minimal: true,
 		}
-	}
+	},
 }

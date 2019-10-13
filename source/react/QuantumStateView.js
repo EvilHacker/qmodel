@@ -14,16 +14,6 @@ const desiredWidth = 1337 + 178
 const height = 514
 const axleY = 218
 
-// SVG defs
-const svgWheelId = styles.wheel
-const svgWheelRef = `#${svgWheelId}`
-const svgAxleId = styles.axle
-const svgAxleRef = `#${svgAxleId}`
-const svgVerticalGuideId = styles.verticalGuide
-const svgVerticalGuideRef = `#${svgVerticalGuideId}`
-const svgDirectionWheelId = styles.directionWheel
-const svgDirectionWheelRef = `#${svgDirectionWheelId}`
-
 export class StateView extends PureComponent {
 	static propTypes = {
 		amplitudes: PropTypes.arrayOf(PropTypes.number).isRequired,
@@ -42,7 +32,7 @@ export class StateView extends PureComponent {
 	render() {
 		const {props} = this
 		const numberOfWheels = props.amplitudes.length >> 1
-		const n = Math.log2(numberOfWheels)
+		const n = Math.round(Math.log2(numberOfWheels))
 		const spacing = Math.max(minSpacing,
 			Math.min(maxSpacing, (desiredWidth - 178) / (numberOfWheels + 1)))
 		const width = (numberOfWheels + 1) * spacing + 178
@@ -146,7 +136,7 @@ export class StateView extends PureComponent {
 					strokeLinecap="round"
 				/>
 				<use
-					xlinkHref={svgDirectionWheelRef}
+					xlinkHref={`#${styles.directionWheel}`}
 					transform={`translate(${compassX} ${axleY})skewY(${circleSkewY})scale(${2 * circleScaleX} 2)rotate(${rotationDegrees})`}
 				/>
 			</g>
@@ -266,7 +256,7 @@ class SvgDefs extends PureComponent {
 			: [ "N", "S", "E", "W" ]
 
 		return <defs>
-			<g id={svgWheelId}>
+			<g id={styles.wheel}>
 				<path
 					// 3 minor spokes
 					d="M0,0L-99,-5-99,5zM-5,99 5,99-5,-99 5,-99z"
@@ -297,7 +287,7 @@ class SvgDefs extends PureComponent {
 				/>
 			</g>
 
-			<g id={svgAxleId}>
+			<g id={styles.axle}>
 				<line
 					// axle in-between two wheels
 					x1="2" x2={props.spacing - 2}
@@ -308,7 +298,7 @@ class SvgDefs extends PureComponent {
 				/>
 			</g>
 
-			<g id={svgVerticalGuideId}>
+			<g id={styles.verticalGuide}>
 				<line
 					// faint dotted vertical line from wheel to binary bit pattern
 					y1="4" y2={props.textTop - axleY}
@@ -319,7 +309,7 @@ class SvgDefs extends PureComponent {
 				/>
 			</g>
 
-			<g id={svgDirectionWheelId} textAnchor="middle" fill="#211">
+			<g id={styles.directionWheel} textAnchor="middle" fill="#211">
 				<g stroke="#622" fill="none" /* group constant elements */ >
 					<circle r="58" />
 					<circle r="65" strokeWidth="2" />
@@ -386,15 +376,15 @@ class WheelView extends PureComponent {
 		const x = (props.i + 1) * props.spacing + 54
 		return <g>
 			{radius > 0.005 && <use
-				xlinkHref={svgWheelRef}
+				xlinkHref={`#${styles.wheel}`}
 				transform={`translate(${x} ${axleY}) skewY(${props.circleSkewY}) scale(${radius * props.circleScaleX} ${radius}) rotate(${-180 / Math.PI * Math.atan2(b, a) + props.rotationDegrees})`}
 			/>}
 			<use
-				xlinkHref={svgAxleRef}
+				xlinkHref={`#${styles.axle}`}
 				transform={`translate(${x} ${axleY}) skewX(${props.axleSkewX})`}
 			/>
 			<use
-				xlinkHref={svgVerticalGuideRef}
+				xlinkHref={`#${styles.verticalGuide}`}
 				transform={`translate(${x} ${axleY})`}
 			/>
 		</g>

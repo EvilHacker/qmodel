@@ -1,13 +1,17 @@
+const isDev = process.env.NODE_ENV === "development"
+const isProd = !isDev
+const minify = isProd && process.env.PRETTY !== "true"
+
 module.exports = {
-	removeComments: "all",
-	collapseWhitespace: "all",
+	removeComments: minify && "all",
+	collapseWhitespace: minify && "all",
 	collapseBooleanAttributes: true,
 	removeEmptyAttributes: true,
 	removeRedundantAttributes: true,
 	deduplicateAttributeValues: true,
 	mergeStyles: true,
 	mergeScripts: true,
-	minifyCss: {
+	minifyCss: minify && {
 		preset: [
 			"default",
 			{
@@ -17,7 +21,7 @@ module.exports = {
 			}
 		]
 	},
-	minifyJs: {},
-	minifyJson: {},
-	minifySvg: {},
+	minifyJs: false,
+	minifyJson: false,
+	minifySvg: false,
 }

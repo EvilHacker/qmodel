@@ -14,8 +14,8 @@
 					"pattern": "$eslint-stylish",
 					"background": {
 						"activeOnStart": true,
-						"beginsPattern": ": Compiling[.][.][.]$",
-						"endsPattern": "^✨  Built in "
+						"beginsPattern": "^rollup v[0-9.]+$",
+						"endsPattern": "] waiting for changes...$"
 					}
 				}
 			]
@@ -31,8 +31,8 @@
 					"pattern": "$eslint-stylish",
 					"background": {
 						"activeOnStart": true,
-						"beginsPattern": "^Starting up http-server",
-						"endsPattern": "^Hit CTRL-C to stop the server"
+						"beginsPattern": "^rollup v[0-9.]+$",
+						"endsPattern": "] waiting for changes...$"
 					}
 				}
 			]
@@ -42,6 +42,24 @@
 			"group": "build",
 			"type": "npm",
 			"script": "build",
+			"problemMatcher": [
+				"$eslint-stylish"
+			]
+		},
+		{
+			"label": "Build Prod",
+			"group": "build",
+			"type": "npm",
+			"script": "build-prod",
+			"problemMatcher": [
+				"$eslint-stylish"
+			]
+		},
+		{
+			"label": "Build Dev",
+			"group": "build",
+			"type": "npm",
+			"script": "build-dev",
 			"problemMatcher": [
 				"$eslint-stylish"
 			]
@@ -60,14 +78,5 @@
 			"script": "clean-all",
 			"problemMatcher": []
 		},
-		{
-			"label": "Lint",
-			"group": "build",
-			"type": "npm",
-			"script": "lint",
-			"problemMatcher": [
-				"$eslint-stylish"
-			]
-		}
 	]
 }
