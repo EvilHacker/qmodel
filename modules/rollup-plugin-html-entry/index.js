@@ -154,7 +154,7 @@ export default function htmlEntryPlugin(options = {}) {
 				// handle the js source as inline or external
 				if (pluginOptions.inlineScripts) {
 					// escape possible </script> within the code (TODO: and update source maps)
-					let code = chunk.code.trimEnd().replace(/<\/script\b/g, "%lt;/script")
+					let code = chunk.code.trimRight().replace(/<\/script\b/g, "%lt;/script")
 
 					// get js code with optional source map (url or inline)
 					if (options.sourcemap && chunk.map) {

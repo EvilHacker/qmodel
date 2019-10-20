@@ -124,6 +124,7 @@ find . -type f \
 	-not -name '*.br' \
 	-not -name '*.map' \
 	| cut -c 3- \
+	| sort \
 	| while read -r file
 do
 	if [ "$compressionEnabled" ]; then

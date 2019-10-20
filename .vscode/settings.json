@@ -1,4 +1,21 @@
 {
+	// use WSL (Windows Subsystem for Linux) for a bash shell
+	"terminal.integrated.shell.windows": "wsl.exe",
+
+	"npm.runSilent": true,
+	"css.lint.emptyRules": "ignore",
+
+	"files.associations": {
+		".*rc": "json"
+	},
+	"files.exclude": {
+		"/.cache": true
+	},
+	"search.exclude": {
+		"/.cache": true,
+		"/build*": true,
+	},
+
 	"cSpell.words": [
 		"Suska",
 		"ampproject",
@@ -34,16 +51,4 @@
 		"xlink",
 		"zopfli"
 	],
-	"files.associations": {
-		".*rc": "json"
-	},
-	"files.exclude": {
-		"/.cache": true
-	},
-	"search.exclude": {
-		"/.cache": true,
-		"/build*": true,
-	},
-	"npm.runSilent": true,
-	"css.lint.emptyRules": "ignore",
 }

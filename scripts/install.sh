@@ -29,7 +29,7 @@ fi
 
 # check if any configuration files, local plugins, or macros have changed
 newer="-newer node_modules/.installed -print -quit"
-if [ "$(find . -type f -maxdepth 1 '(' -name '.*.js' -or -name '.*rc' ')' $newer)" ] \
+if [ "$(find . -maxdepth 1 -type f '(' -name '.*.js' -or -name '.*rc' ')' $newer)" ] \
 	|| [ "$(find modules -type f -path 'modules/*-plugin-*' $newer)" ] \
 	|| [ "$(find source -type f -name '*.macro.js' $newer)" ]
 then
