@@ -23,7 +23,7 @@
 	transition: 0.7s;
 }
 
-.wheels {
+.disks {
 	position: relative;
 	font-family: "Lucida Console", Monaco, monospace;
 	font-size: 24px;
@@ -56,6 +56,10 @@
 	opacity: 1;
 	background: #28f4;
 	cursor: grabbing;
+}
+
+.direction::-ms-tooltip {
+	display: none;
 }
 
 .qubitLabel {
@@ -109,7 +113,7 @@
 }
 
 /* "CSS Modules" ensure globally unique IDs for SVG defs */
-#wheel { /* for SVG use */ }
+#disk { /* for SVG use */ }
 #axle { /* for SVG use */ }
 #verticalGuide { /* for SVG use */ }
-#directionWheel { /* for SVG use */ }
+#compass { /* for SVG use */ }

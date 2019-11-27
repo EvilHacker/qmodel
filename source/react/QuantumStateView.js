@@ -4,7 +4,7 @@
  * @license MIT
  */
 
-import React, { PureComponent } from 'react'
+import React, { PureComponent, createRef } from 'react'
 import PropTypes from 'prop-types'
 import styles from './QuantumStateView.css'
 
@@ -29,28 +29,41 @@ export class StateView extends PureComponent {
 		rotationDegrees: -90 // north pointing up
 	}
 
+	quantumState = createRef()
+
+	componentDidUpdate(prevProps) {
+		// check if the quantum state has decreased in size
+		if (prevProps.amplitudes.length > this.props.amplitudes.length) {
+			const element = this.quantumState.current
+			if (element) {
+				// horizontally scroll the disks into view
+				element.scrollLeft = element.children[0].scrollWidth - element.clientWidth
+			}
+		}
+	}
+
 	render() {
 		const {props} = this
-		const numberOfWheels = props.amplitudes.length >> 1
-		const n = Math.round(Math.log2(numberOfWheels))
+		const numberOfdisks = props.amplitudes.length >> 1
+		const n = Math.round(Math.log2(numberOfdisks))
 		const spacing = Math.max(minSpacing,
-			Math.min(maxSpacing, (desiredWidth - 178) / (numberOfWheels + 1)))
-		const width = (numberOfWheels + 1) * spacing + 178
+			Math.min(maxSpacing, (desiredWidth - 178) / (numberOfdisks + 1)))
+		const width = (numberOfdisks + 1) * spacing + 178
 		const textTop = height - 52 - 14 * n
 
-		return <div className={styles.quantumState}>
-			<svg className={styles.wheels} width={width} height={height}>
+		return <div ref={this.quantumState} className={styles.quantumState}>
+			<svg className={styles.disks} width={width} height={height}>
 				<SvgDefs
 					spacing={spacing}
 					textTop={textTop}
 					directionMode={props.directionMode}
 				/>
-				{this.wheels(spacing)}
+				{this.disks(spacing)}
 			</svg>
 
 			<input
 				type="range"
-				min="-0.5" max="0.5" step="0.03125" defaultValue="0"
+				min={-24} max={8} defaultValue={-8}
 				className={styles.direction}
 				style={{
 					left: width - 241,
@@ -59,7 +72,7 @@ export class StateView extends PureComponent {
 				}}
 				onChange={event => {
 					this.setState({
-						rotationDegrees: event.target.value * 360 - 90
+						rotationDegrees: 11.25 * event.target.value // -270 to +90
 					})
 				}}
 			/>
@@ -84,7 +97,7 @@ export class StateView extends PureComponent {
 			</div>
 
 			<svg
-				width={numberOfWheels * spacing}
+				width={numberOfdisks * spacing}
 				height={height - textTop + 5}
 				className={styles.arcs}
 				style={{
@@ -98,7 +111,7 @@ export class StateView extends PureComponent {
 		</div>
 	}
 
-	wheels(spacing) {
+	disks(spacing) {
 		const amplitudes = this.props.amplitudes
 		const rotationDegrees = this.state.rotationDegrees
 		const cos = (spacing + 10) / 110
@@ -107,11 +120,11 @@ export class StateView extends PureComponent {
 		const circleSkewY = -42 * sin
 		const axleSkewX = -25 * cos
 
-		// add all wheels
+		// add all disks
 		const result = []
 		for (var i = 0; i < amplitudes.length; i += 2) {
 			result.push(
-				<WheelView
+				<DiskView
 					key={i}
 					i={i >> 1}
 					a={amplitudes[i]}
@@ -132,11 +145,11 @@ export class StateView extends PureComponent {
 				<line
 					x1={compassX - 20} y1={axleY} x2={compassX} y2={axleY}
 					stroke="#888"
-					strokeWidth="6"
+					strokeWidth={6}
 					strokeLinecap="round"
 				/>
 				<use
-					xlinkHref={`#${styles.directionWheel}`}
+					xlinkHref={`#${styles.compass}`}
 					transform={`translate(${compassX} ${axleY})skewY(${circleSkewY})scale(${2 * circleScaleX} 2)rotate(${rotationDegrees})`}
 				/>
 			</g>
@@ -214,17 +227,17 @@ export class StateView extends PureComponent {
 						const x1 = spacing * (i + gateMask) - 1
 						const path = `M${x0},${y0}C${x0},${y1} ${x1},${y1} ${x1},${y0}`
 						let stroke = "#840"
-						let strokeWidth = "1"
+						let strokeWidth = 1
 						if ((i & lowerBitsMask) == lowerConditionMask) {
 							stroke = "#a00"
-							strokeWidth = "2"
+							strokeWidth = 2
 						}
 						result.push(<g key={`${b}.${i}`}>
 							<path
 								d={path}
 								stroke="#fff"
-								strokeOpacity="0.3"
-								strokeWidth="2.5"
+								strokeOpacity={0.3}
+								strokeWidth={2.5}
 							/>
 							<path
 								d={path}
@@ -256,18 +269,18 @@ class SvgDefs extends PureComponent {
 			: [ "N", "S", "E", "W" ]
 
 		return <defs>
-			<g id={styles.wheel}>
+			<g id={styles.disk}>
 				<path
 					// 3 minor spokes
 					d="M0,0L-99,-5-99,5zM-5,99 5,99-5,-99 5,-99z"
 					fill="#333"
 				/>
 				<circle
-					r="100"
+					r={100}
 					stroke="#000"
-					strokeWidth="6"
+					strokeWidth={6}
 					fill="#abd"
-					fillOpacity="0.66"
+					fillOpacity={0.7}
 				/>
 				<path
 					// main directional wedge
@@ -283,40 +296,39 @@ class SvgDefs extends PureComponent {
 					// arc of the main directional wedge
 					d="M97.81,20.79A100,100 0 0,0 97.81,-20.79"
 					stroke="#c00"
-					strokeWidth="6.2"
+					strokeWidth={6.2}
 				/>
 			</g>
 
 			<g id={styles.axle}>
 				<line
-					// axle in-between two wheels
-					x1="2" x2={props.spacing - 2}
+					// axle in-between two disks
+					x1={2} x2={props.spacing - 2}
 					stroke="#444"
-					strokeOpacity="0.25"
-					strokeWidth="4"
+					strokeOpacity={0.3}
+					strokeWidth={4}
 					strokeLinecap="round"
 				/>
 			</g>
 
 			<g id={styles.verticalGuide}>
 				<line
-					// faint dotted vertical line from wheel to binary bit pattern
-					y1="4" y2={props.textTop - axleY}
+					// faint dotted vertical line from disk to binary bit pattern
+					y1={4} y2={props.textTop - axleY}
 					stroke="#444"
-					strokeOpacity="0.25"
+					strokeOpacity={0.3}
 					strokeLinecap="round"
 					strokeDasharray="4,8"
 				/>
 			</g>
 
-			<g id={styles.directionWheel} textAnchor="middle" fill="#211">
+			<g id={styles.compass} textAnchor="middle" fill="#211">
 				<g stroke="#622" fill="none" /* group constant elements */ >
-					<circle r="58" />
-					<circle r="65" strokeWidth="2" />
+					<circle r={58} />
+					<circle r={65} strokeWidth={2} />
 					<path
 						d="M40.3,40.3L47,47M-40.3,40.3L-47,47M40.3,-40.3L47,-47M-40.3,-40.3L-47,-47"
-						stroke="#622"
-						strokeWidth="2"
+						strokeWidth={2}
 						strokeLinecap="round"
 					/>
 					<path
@@ -329,7 +341,7 @@ class SvgDefs extends PureComponent {
 						fill="#d44"
 						stroke="#900"
 					/>
-					<circle r="3" fill="#533" />
+					<circle r={3} fill="#533" />
 				</g>
 				<text
 					fill="#d44"
@@ -357,7 +369,7 @@ class SvgDefs extends PureComponent {
 	}
 }
 
-class WheelView extends PureComponent {
+class DiskView extends PureComponent {
 	static propTypes = {
 		i: PropTypes.number.isRequired,
 		a: PropTypes.number.isRequired,
@@ -376,7 +388,7 @@ class WheelView extends PureComponent {
 		const x = (props.i + 1) * props.spacing + 54
 		return <g>
 			{radius > 0.005 && <use
-				xlinkHref={`#${styles.wheel}`}
+				xlinkHref={`#${styles.disk}`}
 				transform={`translate(${x} ${axleY}) skewY(${props.circleSkewY}) scale(${radius * props.circleScaleX} ${radius}) rotate(${-180 / Math.PI * Math.atan2(b, a) + props.rotationDegrees})`}
 			/>}
 			<use
