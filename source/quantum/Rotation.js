@@ -20,7 +20,7 @@ import c from './codeSnippet.macro'
 export function parseRotation(string) {
 	const rotation = Function(c`
 		"use strict";
-		var global = {}, window = {}, document, undefined, Function, setTimeout, clearTimeout, setInterval, clearInterval;
+		var global = {}, window = {}, document, Function, setTimeout, clearTimeout, setInterval, clearInterval;
 		return (${
 			// replace unicode vulgar fractions with equivalents
 			string.replace(/[¼-¾⁄⅐-⅟]/g, match => {

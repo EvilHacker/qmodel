@@ -12,9 +12,11 @@
 		"start": "scripts/start.sh --dev",
 		"start-dev": "scripts/start.sh --dev",
 		"start-prod": "scripts/start.sh --prod",
+		"start-prod-pretty": "scripts/start.sh --prod --pretty",
 		"build": "scripts/build.sh --prod --compress",
 		"build-dev": "scripts/build.sh --dev",
 		"build-prod": "scripts/build.sh --prod",
+		"build-prod-pretty": "scripts/build.sh --prod --pretty",
 		"clean": "scripts/clean.sh",
 		"clean-all": "scripts/clean.sh --all"
 	},

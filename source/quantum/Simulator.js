@@ -116,10 +116,10 @@ export class Operation {
 	/**
 	 * Construct a new operation.
 	 *
-	 * @param {string|Operation|null} op - either:
+	 * @param {string|Operation|null|undefined} op - either:
 	 * - an operation string,
 	 * - an exiting Operation to copy, or
-	 * - null for a no-op
+	 * - null or undefined for a no-op
 	 */
 	constructor(op) {
 		if (op instanceof Operation) {
@@ -130,7 +130,7 @@ export class Operation {
 			this.transform = op.transform
 			this.condition = op.condition
 			this.gates = op.gates
-		} else if (op === null) {
+		} else if (op == null) {
 			// No-Op
 			this.op = op
 			this.minLength = this.length = 0
@@ -218,7 +218,7 @@ export class Operation {
 
 		// loop over each bit of the operation (lsb to msb)
 		for (var i = 0; i < this.length; ) {
-			var transform = undefined
+			var transform = null
 			var gate = this.get(i)
 			switch (gate) {
 				case '-':
@@ -299,7 +299,7 @@ export class Operation {
 				this.gates.push(gate)
 			}
 
-			if (transform === undefined) {
+			if (transform == null) {
 				++i
 				continue
 			}
@@ -308,7 +308,6 @@ export class Operation {
 			var bitLength = 1
 			while (i + bitLength < this.length && this.get(i + bitLength) == '-') {
 				++bitLength
-				this.gates.push(undefined)
 			}
 
 			code =
@@ -545,7 +544,7 @@ export class Simulator {
 	compiledOp(op) {
 		if (op instanceof Operation) {
 			return op
-		} else if (op === null) {
+		} else if (op == null) {
 			return noop
 		}
 		return new Operation(op)

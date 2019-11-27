@@ -6,7 +6,7 @@
 	"css.lint.emptyRules": "ignore",
 
 	"files.associations": {
-		".*rc": "json"
+		"/.*rc": "json"
 	},
 	"files.exclude": {
 		"/.cache": true

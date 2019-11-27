@@ -44,7 +44,7 @@ options.vnode = vnode => {
 	if (!vnode.normalized) {
 		vnode.normalized = true
 		const props = vnode.attributes
-		if (props && typeof vnode.nodeName === 'string') {
+		if (props && typeof vnode.nodeName == 'string') {
 			// rename specific props from camelCase to kebab-case
 			for (const prop in props) {
 				if (/^(?:fill|stroke|text)[A-Z]/.test(prop)) {
@@ -79,7 +79,7 @@ options.vnode = vnode => {
 
 					// set any previous ref
 					if (ref !== undefined) {
-						if (process.env.NODE_ENV === "development" && typeof ref === 'function') {
+						if (process.env.NODE_ENV === "development" && typeof ref == 'function') {
 							// browser plugins may rely on function refs in development mode
 							ref(current)
 						} else {
