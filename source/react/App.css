@@ -30,15 +30,18 @@
 }
 
 .settings table {
-	padding: 5px;
+	padding: 7px;
+	border-spacing: 0;
 }
 
-.settings tr {
-	height: 27px;
-	vertical-align: text-bottom;
+.settings td {
+	height: 29px;
+	padding: 0 2px;
 }
 
 .settings select {
+	max-height: 29px;
+	overflow: visible;
 	font-size: 100%;
 }
 
