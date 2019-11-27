@@ -10,6 +10,7 @@
 import 'mdn-polyfills/Object.assign'
 import 'mdn-polyfills/Object.entries'
 import 'mdn-polyfills/Array.prototype.fill'
+import 'mdn-polyfills/Array.prototype.findIndex'
 import 'mdn-polyfills/String.prototype.endsWith'
 import 'mdn-polyfills/String.prototype.includes'
 import 'mdn-polyfills/Number.isInteger'

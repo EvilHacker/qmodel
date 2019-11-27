@@ -5,8 +5,7 @@
  */
 
 .program {
-	/* note: trailing -apple-system font fixes the pointer (➤) appearance in Firefox on Mac OS */
-	font-family: "Courier New", Courier, monospace, -apple-system;
+	font-family: "Courier New", Courier, monospace;
 }
 
 .program td {
@@ -117,12 +116,9 @@
 }
 
 .pointer {
-	margin-top: -6px;
-	padding-right: 0;
-	letter-spacing: -1px;
-	font-size: 30px;
-	line-height: 35px;
-	color: #0c7;
+	width: 100%;
+	border-radius: 0 50% 50% 0;
+	background-color: #9da;
 }
 
 .errorHighlight {

@@ -17,6 +17,13 @@ const lineHeight = 20
 const characterWidth = 10
 const padding = 4
 
+function trimLine(line) {
+	return line && line
+		.split("//")[0]
+		.split("#")[0]
+		.trim()
+}
+
 export class QuantumProgramView extends PureComponent {
 	static propTypes = {
 		defaultValue: PropTypes.string,
@@ -47,36 +54,38 @@ export class QuantumProgramView extends PureComponent {
 
 	textArea = createRef()
 
-	step(direction) {
-		const {state} = this
-		let nextLineNumber = state.nextLineNumber
-		if (direction < 0) {
-			nextLineNumber += direction
-			if (nextLineNumber < 0) {
-				// stepping backward at beginning of program - don't do anything
-				return
-			}
-		}
-		const lines = state.programLines
-		if (nextLineNumber >= lines.length) {
-			// stepping forward at end of program - don't do anything
-			return
-		}
+	jumpToFirstLineOfCode() {
+		this.setNextLineNumber(Math.max(0, this.state.programLines.findIndex(trimLine)))
+	}
 
-		// get the line without comment and leading/trailing whitespace
-		let line = lines[nextLineNumber]
-			.split("//")[0]
-			.split("#")[0]
-			.trim()
+	step(direction) {
+		const {programLines} = this.state
+		let {nextLineNumber} = this.state
+		let line
+
+		if (direction > 0) {
+			// get the current line
+			line = trimLine(programLines[nextLineNumber])
+		} else {
+			// get the previous non-empty line
+			while (nextLineNumber > 0
+				&& !(line = trimLine(programLines[--nextLineNumber]))
+			) {
+				// no-op
+			}
+
+			// position at the line immediately after
+			this.setNextLineNumber(nextLineNumber + 1)
+		}
 
 		// perform the operation (iff not empty)
-		if (line.length > 0) {
+		if (line) {
 			line = line.split(",")
 			let errorPrefix = ""
 			try {
 				const op = line[0]
 				errorPrefix = "Rotation: "
-				const rotation = parseRotation(line.slice(1).join() || "0.5")
+				const rotation = parseRotation(line.slice(1).join(",") || "0.5")
 				errorPrefix = "Operation: "
 				this.props.onOp(op, direction * rotation)
 			} catch (ex) {
@@ -89,8 +98,14 @@ export class QuantumProgramView extends PureComponent {
 		}
 
 		if (direction > 0) {
-			nextLineNumber += direction
+			// get the next non-empty line
+			while (nextLineNumber < programLines.length
+				&& !(line = trimLine(programLines[++nextLineNumber]))
+			) {
+				// no-op
+			}
 		}
+
 		this.setNextLineNumber(nextLineNumber)
 	}
 
@@ -99,8 +114,8 @@ export class QuantumProgramView extends PureComponent {
 
 		// scroll pointer into view
 		const pointerTop = nextLineNumber * lineHeight - this.state.verticalScroll + padding
-		if (pointerTop < 0) {
-			const scrollAmount = Math.min(textArea.scrollTop, -pointerTop)
+		if (pointerTop < lineHeight) {
+			const scrollAmount = Math.min(textArea.scrollTop, lineHeight - pointerTop)
 			textArea.scrollTop -= scrollAmount
 		} else if (pointerTop >= textArea.clientHeight - lineHeight) {
 			const scrollAmount = Math.max(0, Math.min(
@@ -140,7 +155,7 @@ export class QuantumProgramView extends PureComponent {
 
 	onReset = () => {
 		this.props.onReset()
-		this.setNextLineNumber(0)
+		this.jumpToFirstLineOfCode()
 	}
 
 	onUpdateProgramText = () => {
@@ -148,7 +163,7 @@ export class QuantumProgramView extends PureComponent {
 		const lines = program.split(/\r|\r\n|\n/)
 
 		// remove any trailing blank lines
-		while (lines.length > 0 && lines[lines.length - 1].trim() == "") {
+		while (lines.length > 0 && !lines[lines.length - 1].trim()) {
 			lines.pop()
 		}
 
@@ -199,6 +214,7 @@ export class QuantumProgramView extends PureComponent {
 
 	componentDidMount() {
 		this.onUpdateProgramText()
+		this.jumpToFirstLineOfCode()
 		this.onUpdateScrollPosition()
 	}
 
@@ -221,15 +237,14 @@ export class QuantumProgramView extends PureComponent {
 		// next operation pointer
 		const gutterContent = [
 			<div
-				key="p"
+				key={-1}
 				className={styles.pointer}
 				style={{
-					top: nextLineNumber * lineHeight - verticalScroll + padding,
+					top: nextLineNumber * lineHeight - verticalScroll + padding - 1,
+					height: lineHeight,
 					transition: state.stepping && "0.2s"
 				}}
-			>
-				➤
-			</div>
+			/>
 		]
 
 		// line numbers
@@ -237,9 +252,10 @@ export class QuantumProgramView extends PureComponent {
 			gutterContent.push(
 				<div
 					key={i}
-					className={i === menuLineNumber
+					className={i == menuLineNumber
 						? `${styles.lineNumber} ${styles.selected}`
-						: styles.lineNumber}
+						: styles.lineNumber
+					}
 					style={{
 						top: i * lineHeight - verticalScroll + padding,
 						height: lineHeight
@@ -253,7 +269,7 @@ export class QuantumProgramView extends PureComponent {
 		}
 
 		// error message (if any)
-		let error = undefined
+		let error
 		if (errorLineNumber !== null) {
 			error = <div>
 				<div
@@ -280,7 +296,7 @@ export class QuantumProgramView extends PureComponent {
 		}
 
 		// pop-up menu (if shown)
-		let gutterMenu = undefined
+		let gutterMenu
 		if (menuLineNumber !== null) {
 			gutterMenu = <div
 				className={styles.popup}
@@ -322,10 +338,10 @@ export class QuantumProgramView extends PureComponent {
 				</tr>
 
 				<tr>
-					<td colSpan="2" className={styles.editor}>
+					<td colSpan={2} className={styles.editor}>
 						<textarea
 							ref={this.textArea}
-							rows="16" cols="24"
+							rows={16} cols={64}
 							wrap="off"
 							autoComplete="off"
 							autoCorrect="off"
