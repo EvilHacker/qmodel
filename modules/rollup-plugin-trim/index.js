@@ -6,7 +6,12 @@
  * TODO: handle source map
  */
 
-module.exports = function stylelintPlugin() {
+module.exports = function stylelintPlugin(options = {}) {
+	const {trimIife} = {
+		trimIife: false,
+		...options
+	}
+
 	return {
 		name: 'trim',
 
@@ -19,13 +24,13 @@ module.exports = function stylelintPlugin() {
 			code = code.trim()
 			if (code.endsWith(";")) {
 				// remove trailing semicolon
-				code = code.slice(0, -1).trim()
+				code = code.slice(0, -1).trimRight()
 			}
-			if (code.startsWith("'use strict';")) {
+			if (code.startsWith("'use strict';") || code.startsWith('"use strict";')) {
 				// remove 'use strict' prefix
-				code = code.slice(13).trim()
+				code = code.slice(13).trimLeft()
 			}
-			if (code.startsWith("(function(){") && code.endsWith("})()")) {
+			if (trimIife && code.startsWith("(function(){") && code.endsWith("})()")) {
 				// remove iife wrapper
 				code = code.slice(12, -4).trim()
 			}

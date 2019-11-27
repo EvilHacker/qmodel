@@ -12,7 +12,7 @@ import alias from 'rollup-plugin-alias'
 import html from './modules/rollup-plugin-html-entry/index'
 import postcss from 'rollup-plugin-postcss'
 import svgr from '@svgr/rollup'
-import copy from "rollup-plugin-copy-assets";
+import copy from "rollup-plugin-copy-assets"
 import serve from 'rollup-plugin-live-server'
 
 // build options derived from environment variables:
@@ -42,13 +42,23 @@ const closureCompiler = isProd && require('@ampproject/rollup-plugin-closure-com
 	charset: "utf8"
 })
 
-const babelMinify = builtIns => require('rollup-plugin-babel-minify')({
+const babelMinify = (options = {}) => require('rollup-plugin-babel-minify')({
 	comments: false,
 	sourceMap: false,
-	builtIns: builtIns,
+	builtIns: true,
+	mangle: {
+		topLevel: true
+	},
+	plugins: [
+		`${__dirname}/modules/babel-plugin-minify-intern`,
+	],
+	...options
 })
 
-const pluginsPre = [
+const trim = (options = {}) => require('./modules/rollup-plugin-trim/index')(options)
+
+// plugins for all inputs (with string placeholders)
+const plugins = [
 	eslint({
 		exclude: /[.](html|css|svg)$/, // ignore generated code
 		formatter: eslintFormatter
@@ -56,7 +66,7 @@ const pluginsPre = [
 	replace({
 		patterns: [
 			{
-				// inline the value of environment variables at compile time
+				// inline the value of existing environment variables at compile time
 				test: /\bprocess\.env\.([a-zA-Z_][a-zA-Z0-9_]*)\b/g,
 				replace: (_, variableName) => variableName in process.env
 					? JSON.stringify(process.env[variableName])
@@ -75,9 +85,7 @@ const pluginsPre = [
 			}] : []
 		]
 	}),
-]
-
-const pluginsPost = [
+	"placeholderForHtml",
 	babel({
 		// helpers handled by modules/babel-plugin-transform-inline-helpers
 		externalHelpers: isProd,
@@ -93,22 +101,56 @@ const pluginsPost = [
 		// optimization and minimization
 		closureCompiler,
 		closureCompiler,
-		babelMinify(true),
+		"placeholderForBabelMinify",
+		"placeholderForTrim",
 		require('./modules/rollup-plugin-unescape/index')(),
-		require('./modules/rollup-plugin-trim/index')(),
 	] : [],
 	...pretty ? [
 		require('./modules/rollup-plugin-js-beautify/index')({
 			indent_with_tabs: true, // eslint-disable-line camelcase
 		}),
 	] : [],
+	"placeholderForCopy",
 	...serverPort ? [
-		// web server with live reload and css injection
-		serve({
-			port: serverPort,
-			root: outputDir,
-			ignore: [ file => !file.match(/[.](?:html|js|css)$|^[^.]+$/) ]
-		}),
+		"placeholderForWebServer",
+	] : [],
+]
+
+// additional plugins for html inputs
+const htmlPlugins = [
+	stylelint({
+		formatter: stylelintFormatter
+	}),
+	postcss({
+		config: false,
+		extract: true,
+		plugins: [
+			require('autoprefixer')(),
+			require('postcss-colormin').default(), // for IE compatibility
+		],
+		modules: {
+			generateScopedName: isDev
+				? (name, filename) => `${name}_${cssModulesUniqueId(name, filename)}`
+				: (name, filename) => cssModulesUniqueId(name, filename)
+		},
+	}),
+	html({
+		minimize: isProd,         // using htmlnano, with options from .htmlnanorc.js
+		injectExtractedCss: true, // inject single CSS Module "extract"ed by postcss plugin above
+		inlineScripts: isProd,    // false: <script src="x.js"></script> true: <script>...</script>
+		inlineStyles: isProd,     // false: <link rel="stylesheet" href="x.css"></link> true: <style>...</style>
+		commentOutTags: isDev,
+	}),
+	svgr(),
+	... react === "preact" ? [
+		alias({
+			entries: [
+				{ find: "preact",          replacement: `${__dirname}/node_modules/preact/dist/preact.es` },
+				{ find: "preact-devtools", replacement: `${__dirname}/node_modules/preact/devtools` },
+				{ find: "react",           replacement: `${__dirname}/source/react/preact-compat` },
+				{ find: "react-dom",       replacement: `${__dirname}/source/react/preact-compat` },
+			]
+		})
 	] : [],
 ]
 
@@ -116,61 +158,73 @@ export default [
 	{
 		input: "source/index.html",
 		output: outputOptions,
-		plugins: [
-			...pluginsPre,
-			stylelint({
-				formatter: stylelintFormatter
-			}),
-			postcss({
-				config: false,
-				extract: true,
-				plugins: [
-					require('autoprefixer')(),
-					require('postcss-colormin').default(), // for IE compatibility
-				],
-				modules: {
-					generateScopedName: isDev
-						? (name, filename) => `${name}_${cssModulesUniqueId(name, filename)}`
-						: (name, filename) => cssModulesUniqueId(name, filename)
-				},
-			}),
-			html({
-				minimize: isProd,         // using htmlnano, with options from .htmlnanorc.js
-				injectExtractedCss: true, // inject single CSS Module "extract"ed by postcss plugin above
-				inlineScripts: isProd,    // false: <script src="x.js"></script> true: <script>...</script>
-				inlineStyles: isProd,     // false: <link rel="stylesheet" href="x.css"></link> true: <style>...</style>
-				commentOutTags: isDev,
-			}),
-			svgr(),
-			... react === "preact" ? [
-				alias({
-					entries: [
-						{ find: "preact",          replacement: `${__dirname}/node_modules/preact/dist/preact.es` },
-						{ find: "preact-devtools", replacement: `${__dirname}/node_modules/preact/devtools` },
-						{ find: "react",           replacement: `${__dirname}/source/react/preact-compat` },
-						{ find: "react-dom",       replacement: `${__dirname}/source/react/preact-compat` },
-					]
-				})
-			] : [],
-			copy({
-				assets: [
-					"source/favicon.ico",
+		plugins: plugins.flatMap(plugin => {
+			// fill-in placeholders
+			if (plugin === "placeholderForHtml") {
+				return htmlPlugins
+			} else if (plugin === "placeholderForBabelMinify") {
+				return [
+					babelMinify({
+						builtIns: true
+					})
 				]
-			}),
-			...pluginsPost
-		]
+			} else if (plugin === "placeholderForTrim") {
+				return [
+					trim({
+						trimIife: true // remove iife wrapper
+					})
+				]
+			} else if (plugin === "placeholderForCopy") {
+				return [
+					copy({
+						assets: [
+							"source/favicon.ico",
+						]
+					})
+				]
+			} else if (plugin === "placeholderForWebServer") {
+				return [
+					// web server with live reload and css injection
+					serve({
+						port: serverPort,
+						root: outputDir,
+						ignore: [ file => !file.match(/[.](?:html|js|css)$|^[^.]+$/) ]
+					})
+				]
+			} else if (typeof plugin === "string") {
+				// ignore any other placeholders
+				return []
+			} else {
+				// pass the plugin through unchanged
+				return [plugin]
+			}
+		}),
 	},
 	{
 		input: "source/polyfills/polyfills.js",
 		output: outputOptions,
-		plugins: [
-			...pluginsPre,
-			...pluginsPost.map(plugin =>
-				plugin.name === "babel-minify"
-					? babelMinify(false) // disable minification that breaks assignment to built-ins
-					: plugin
-			)
-		],
+		plugins: plugins.flatMap(plugin => {
+			// fill-in placeholders
+			if (plugin === "placeholderForBabelMinify") {
+				return [
+					babelMinify({
+						builtIns: false // disable minification that breaks assignment to built-ins
+					})
+				]
+			} else if (plugin === "placeholderForTrim") {
+				return [
+					trim({
+						trimIife: false // don't remove iife wrapper
+					})
+				]
+			} else if (typeof plugin === "string") {
+				// ignore any other placeholders
+				return []
+			} else {
+				// pass the plugin through unchanged
+				return [plugin]
+			}
+		}),
 	},
 ]
 

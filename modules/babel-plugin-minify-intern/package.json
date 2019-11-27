@@ -1,0 +1,14 @@
+{
+	"name": "babel-plugin-minify-intern",
+	"version": "0.0.1",
+	"description": "Intern large string literals, numeric literals, and property references",
+	"keywords": [
+		"babel-plugin"
+	],
+	"author": "Mark Suska <mark.suska@me.com>",
+	"license": "MIT",
+	"main": "src/index.js",
+	"peerDependencies": {
+		"@babel/core": "^7.6.0"
+	}
+}
