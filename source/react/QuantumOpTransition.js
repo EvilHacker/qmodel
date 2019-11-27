@@ -18,6 +18,7 @@ export class QuantumOpTransition extends PureComponent {
 		rotation: PropTypes.number,
 		directionMode: PropTypes.oneOf(["compass", "complex"]),
 		transitionMode: PropTypes.oneOf(["simple", "accurate"]),
+		transitionSpeed: PropTypes.oneOf(["fast", "slow"]),
 		onDone: PropTypes.func, // () => undefined
 	}
 
@@ -30,7 +31,7 @@ export class QuantumOpTransition extends PureComponent {
 		const {props} = this
 		const {sim: nextState, directionMode, onDone} = props
 
-		if (props.op === null || props.op === noop) {
+		if (props.op == null || props.op == noop) {
 			// no operation to animate
 			return <Transition duration={0} onDone={onDone} render={() => {
 				return <StateView
@@ -41,13 +42,14 @@ export class QuantumOpTransition extends PureComponent {
 		}
 
 		const op = nextState.compiledOp(props.op)
-		const rotation = props.rotation
+		const {rotation} = props
+		const rotationTime = props.transitionSpeed == "slow" ? 8000 : 2000
 
 		if (props.transitionMode == "simple") {
 			// interpolate between the previous state and the next state
 			const previousState = new Simulator(nextState)
 			previousState.do(op, -rotation)
-			const duration = 1000 + 2000 * (Math.abs(rotation) % 1)
+			const duration = 1000 + rotationTime * (Math.abs(rotation) % 1)
 			const getAmplitudes = tween(previousState.amplitudes, nextState.amplitudes)
 			return <Transition
 				duration={duration}
@@ -71,7 +73,7 @@ export class QuantumOpTransition extends PureComponent {
 			/>
 		} else {
 			// gradually rotate from the previous state to the next state using the operation
-			const duration = 1000 + 2000 * Math.abs(rotation)
+			const duration = 1000 + rotationTime * Math.abs(rotation)
 			return <Transition
 				duration={duration}
 				onDone={onDone}

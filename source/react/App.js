@@ -31,6 +31,7 @@ export class App extends PureComponent {
 		const numberOfQubits = Math.max(1, Math.min(maxQubits, load("numberOfQubits", 1)))
 		const directionMode = load("directionMode", "compass")
 		const transitionMode = load("transitionMode", "simple")
+		const transitionSpeed = load("transitionSpeed", "fast")
 		this.program = load("program", defaultProgram)
 
 		this.state = {
@@ -41,6 +42,8 @@ export class App extends PureComponent {
 			directionMode: directionMode,
 			transitionMode: transitionMode,
 			nextTransitionMode: transitionMode,
+			transitionSpeed: transitionSpeed,
+			nextTransitionSpeed: transitionSpeed,
 		}
 
 		this.sim = new Simulator(numberOfQubits)
@@ -59,7 +62,8 @@ export class App extends PureComponent {
 			count: state.count + 1,
 			op: op,
 			rotation: rotation,
-			transitionMode: state.nextTransitionMode
+			transitionMode: state.nextTransitionMode,
+			transitionSpeed: state.nextTransitionSpeed,
 		})
 	}
 
@@ -68,7 +72,7 @@ export class App extends PureComponent {
 		this.sim = new Simulator(state.numberOfQubits)
 		this.setState({
 			count: state.count + 1,
-			op: undefined,
+			op: null,
 			rotation: 0,
 			showSettings: false
 		})
@@ -76,7 +80,7 @@ export class App extends PureComponent {
 
 	onDone = () => {
 		this.setState({
-			op: undefined,
+			op: null,
 			rotation: 0
 		})
 	}
@@ -120,6 +124,14 @@ export class App extends PureComponent {
 		save("transitionMode", transitionMode)
 	}
 
+	onTransitionSpeed = event => {
+		const transitionSpeed = event.target.value
+		this.setState({
+			nextTransitionSpeed: transitionSpeed
+		})
+		save("transitionSpeed", transitionSpeed)
+	}
+
 	render() {
 		const {state} = this
 		let settings = undefined
@@ -161,6 +173,14 @@ export class App extends PureComponent {
 									<option value="simple">Simple</option>
 									<option value="accurate">Accurate</option>
 								</select>
+								{" "}
+								<select
+									value={state.nextTransitionSpeed}
+									onChange={this.onTransitionSpeed}
+								>
+									<option value="fast">Fast</option>
+									<option value="slow">Slow</option>
+								</select>
 							</td>
 						</tr>
 					</tbody>
@@ -179,6 +199,7 @@ export class App extends PureComponent {
 					rotation={state.rotation}
 					directionMode={state.directionMode}
 					transitionMode={state.transitionMode}
+					transitionSpeed={state.transitionSpeed}
 					onDone={this.onDone}
 				/>
 			</div>
