@@ -85,11 +85,11 @@ async function patchBabel() {
 	const patch = code => code.replace(
 		/^(\s*)\bstate\.callee = pass\.get\("jsxIdentifier"\)\(\);(.*)$/m, dedent`
 		$1state.callee = pass.get("jsxIdentifier")() /*PATCHED*/ ;$2
-		$1if (_core().types.isNullLiteral(state.args[1])) {
+		$1if (_core.types.isNullLiteral(state.args[1])) {
 		$1	if (state.args.length == 2) {
 		$1		state.args.length = 1;
 		$1	} else {
-		$1		state.args[1] = _core().types.objectExpression([]);
+		$1		state.args[1] = _core.types.objectExpression([]);
 		$1	}
 		$1}`
 	)
