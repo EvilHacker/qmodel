@@ -31,10 +31,12 @@ module.exports = {
 				`${__dirname}/modules/babel-plugin-transform-inline-helpers`,
 				{
 					useRollupHelpers: true,
+					useObjectAssign: isProd,
 					expectedHelpers: isProd ? [
 						// these are the only helpers expected in a production build
 						"assertThisInitialized", // inlined noop
 						"defineProperty", // inlined
+						"extends", // replaced with Object.assign
 						"inheritsLoose",
 					] : undefined
 				}

@@ -38,6 +38,9 @@
  * 	// 3) whether to use helper support in rollup-plugin-babel
  * 	useRollupHelpers: true|undefined
  *
+ * 	// Call Object.assign() directly (assuming it exists).
+ * 	useObjectAssign: true|false
+ *
  * 	// optionally, warn if an unexpected helper is encountered
  * 	expectedHelpers: ["assertThisInitialized", "defineProperty"]|undefined
  * }
@@ -82,6 +85,18 @@ module.exports = ({types: t}, options = {}) => {
 			),
 			call.arguments[2]
 		),
+
+		...options.useObjectAssign ? {
+			// call Object.assign() directly
+			extends: call => t.callExpression(
+				t.memberExpression(
+					t.identifier("Object"),
+					t.identifier("assign"),
+					false
+				),
+				call.arguments
+			)
+		} : {}
 	}
 
 	let currentInlineHelpers = {}

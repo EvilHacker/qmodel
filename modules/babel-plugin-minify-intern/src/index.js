@@ -133,7 +133,7 @@ module.exports = ({types: t}, options = {}) => {
 						insertionPath = insertionPath[0]
 					}
 
-					for (var [value, literal] of literals.entries()) {
+					for (const [value, literal] of literals.entries()) {
 						// check the number of references to the literal
 						const occurrences = literal.refs.length
 						if (occurrences < minOccurrences) {
