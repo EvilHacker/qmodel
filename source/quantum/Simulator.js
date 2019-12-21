@@ -46,7 +46,7 @@ export function normalizeOp(op) {
 	var i = 0
 
 	// trim leading '|', '-', '_', and whitespace
-	while (i < op.length && (op.charCodeAt(i) <= 32 || "│|-_".includes(op[i]))) {
+	while (i < op.length && (op.charCodeAt(i) <= 32 || "-_|│".includes(op[i]))) {
 		++i
 	}
 
@@ -98,7 +98,7 @@ export function normalizeOp(op) {
 				}
 				// fallthrough...
 			default:
-				throw `Invalid character '${op[i]}'`
+				throw `Invalid character '${op[i]}' in operation`
 		}
 
 		++i
@@ -118,7 +118,7 @@ export class Operation {
 	 *
 	 * @param {string|Operation|null|undefined} op - either:
 	 * - an operation string,
-	 * - an exiting Operation to copy, or
+	 * - an existing Operation to copy, or
 	 * - null or undefined for a no-op
 	 */
 	constructor(op) {
@@ -217,22 +217,18 @@ export class Operation {
 		var conditionValue = 0
 
 		// loop over each bit of the operation (lsb to msb)
-		for (var i = 0; i < this.length; ) {
+		for (var i = 0; i < this.length; ++i) {
 			var transform = null
 			var gate = this.get(i)
 			switch (gate) {
 				case '-':
-					gate = undefined
-					transform = ""
-					break
+					continue
 				case '0':
-					gate = undefined
 					conditionMask |= 1 << i
-					break
+					continue
 				case '1':
-					gate = undefined
 					conditionMask |= conditionValue |= 1 << i
-					break
+					continue
 				case 'H':
 					needTrig2 = needTrig3 = true
 					tempsNeeded = Math.max(6, tempsNeeded)
@@ -295,13 +291,8 @@ export class Operation {
 					break
 			}
 
-			if (i < this.minLength) {
-				this.gates.push(gate)
-			}
-
-			if (transform == null) {
-				++i
-				continue
+			if (gate) {
+				this.gates[i] = gate
 			}
 
 			// left-extend the number of bits to count as much as possible
@@ -316,7 +307,7 @@ export class Operation {
 					((1 << (i + bitLength)) - 1) & ~((1 << i) | conditionMask),
 					transform)
 
-			i += bitLength
+			i += bitLength - 1
 		}
 
 		if (!code) {
@@ -472,6 +463,21 @@ export class Operation {
 export const noop = new Operation(null)
 
 /**
+ * Return a compiled Operation.
+ *
+ * @param {string|Operation} op - an operation
+ * @returns {Operation} a compiled Operation
+ */
+export function compiledOp(op) {
+	if (op instanceof Operation) {
+		return op
+	} else if (op == null) {
+		return noop
+	}
+	return new Operation(op)
+}
+
+/**
  * Simulates the state of a quantum processor.
  * Keeps the complex amplitudes for all qubits states.
  * The state can be modified by an operation.
@@ -510,7 +516,7 @@ export class Simulator {
 	 * @returns {Operation} the compiled Operation that was performed
 	 */
 	do(op, rotation = 1/2) {
-		op = this.compiledOp(op)
+		op = compiledOp(op)
 
 		// check for full rotation(s) (i.e., integer rotation)
 		if (Number.isInteger(rotation)) {
@@ -536,27 +542,12 @@ export class Simulator {
 	}
 
 	/**
-	 * Return a compiled Operation.
-	 *
-	 * @param {string|Operation} op - an operation
-	 * @returns {Operation} a compiled Operation
-	 */
-	compiledOp(op) {
-		if (op instanceof Operation) {
-			return op
-		} else if (op == null) {
-			return noop
-		}
-		return new Operation(op)
-	}
-
-	/**
 	 * Increase the quantum state to the specified number of qubits.
 	 * Any new qubits are assumed to be in the 0 state.
 	 * Don't do anything if the current state already has enough qubits.
 	 *
 	 * @param {number} numberOfQubits - integer greater or equal to 0
-	 * @returns {undefined} void
+	 * @returns {boolean} whether the state needed to be expanded
 	 */
 	expandState(numberOfQubits) {
 		if (numberOfQubits > this.numberOfQubits) {
@@ -564,6 +555,8 @@ export class Simulator {
 			this.amplitudes.length = 2 << numberOfQubits
 			this.amplitudes.fill(0, oldLength)
 			this.numberOfQubits = numberOfQubits
+			return true
 		}
+		return false
 	}
 }

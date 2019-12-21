@@ -4,6 +4,10 @@
  * @license MIT
  */
 
+.top {
+	position: relative;
+}
+
 .quantumState {
 	position: relative;
 	overflow-x: scroll;
@@ -62,11 +66,58 @@
 	display: none;
 }
 
-.qubitLabel {
-	height: 13px;
-	margin-top: 1px;
+.qubitLabels {
+	position: absolute;
+	user-select: none;
 	font-family: Menlo, "Lucida Console", monospace;
+	font-size: 15px;
 	color: #007;
+	transition: 0.7s;
+}
+
+.qubitLabels table {
+	border-collapse: collapse;
+}
+
+.qubitLabels td {
+	padding: 0;
+	background-color: #fffe;
+}
+
+.qubitLabels td:first-child {
+	text-align: right;
+}
+
+.qubitLabels td:last-child {
+	min-width: 4px;
+	font-weight: 700;
+	color: #30b;
+	background-color: #fffc;
+}
+
+.qubitLabels div {
+	height: 14px;
+	line-height: 14px;
+	white-space: pre;
+}
+
+.loopStack {
+	position: absolute;
+	left: 0;
+	user-select: none;
+	font-family: Menlo, "Lucida Console", monospace;
+	font-size: 15px;
+	text-align: right;
+	background-color: #fffc;
+	transform: rotate(-90deg);
+	transform-origin: left top;
+	transition: 0.7s;
+}
+
+.loopStack td:nth-child(even) {
+	padding: 0 4px;
+	font-weight: 700;
+	color: #30b;
 }
 
 .binary {

@@ -10,19 +10,32 @@ import styles from './QuantumStateView.css'
 
 const minSpacing = 9
 const maxSpacing = 50
-const desiredWidth = 1337 + 178
+const marginLeft = 112
+const marginRight = 120
+const desiredWidth = 1400
 const height = 514
 const axleY = 218
 
 export class StateView extends PureComponent {
 	static propTypes = {
 		amplitudes: PropTypes.arrayOf(PropTypes.number).isRequired,
+		labels: PropTypes.arrayOf(PropTypes.string),
+		loopStack: PropTypes.arrayOf(PropTypes.shape({
+			loopLabel: PropTypes.string,
+			count: PropTypes.number,
+			times: PropTypes.number,
+		})),
 		condition: PropTypes.shape({
 			mask: PropTypes.number,
 			value: PropTypes.number,
 		}),
 		gates: PropTypes.arrayOf(PropTypes.string),
 		directionMode: PropTypes.oneOf(["compass", "complex"]),
+	}
+
+	static defaultProps = {
+		labels: [],
+		loopStack: [],
 	}
 
 	state = {
@@ -44,70 +57,81 @@ export class StateView extends PureComponent {
 
 	render() {
 		const {props} = this
-		const numberOfdisks = props.amplitudes.length >> 1
-		const n = Math.round(Math.log2(numberOfdisks))
+		const numberOfDisks = props.amplitudes.length >> 1
+		const n = Math.round(Math.log2(numberOfDisks))
+		const m = Math.max(n, this.props.labels.length)
 		const spacing = Math.max(minSpacing,
-			Math.min(maxSpacing, (desiredWidth - 178) / (numberOfdisks + 1)))
-		const width = (numberOfdisks + 1) * spacing + 178
-		const textTop = height - 52 - 14 * n
+			Math.min(maxSpacing, desiredWidth / (numberOfDisks + 1)))
+		const width = (numberOfDisks + 1) * spacing + marginLeft + marginRight
+		const textTop = height - 52 - 14 * m
 
-		return <div ref={this.quantumState} className={styles.quantumState}>
-			<svg className={styles.disks} width={width} height={height}>
-				<SvgDefs
-					spacing={spacing}
-					textTop={textTop}
-					directionMode={props.directionMode}
+		return <div className={styles.top}>
+			<div ref={this.quantumState} className={styles.quantumState}>
+				<svg className={styles.disks} width={width} height={height}>
+					<SvgDefs
+						spacing={spacing}
+						textTop={textTop}
+						directionMode={props.directionMode}
+					/>
+					{this.disks(spacing)}
+				</svg>
+
+				<input
+					type="range"
+					min={-24} max={8} defaultValue={-8}
+					className={styles.direction}
+					style={{
+						left: width - marginRight - 117,
+						top: axleY - 5,
+						width: 270
+					}}
+					onChange={event => {
+						this.setState({
+							rotationDegrees: 11.25 * event.target.value // -270 to +90
+						})
+					}}
 				/>
-				{this.disks(spacing)}
-			</svg>
 
-			<input
-				type="range"
-				min={-24} max={8} defaultValue={-8}
-				className={styles.direction}
-				style={{
-					left: width - 241,
-					top: axleY - 5,
-					width: 270
-				}}
-				onChange={event => {
-					this.setState({
-						rotationDegrees: 11.25 * event.target.value // -270 to +90
-					})
-				}}
-			/>
+				<div
+					width={width}
+					style={{
+						left: marginLeft + 0.5 * spacing,
+						top: textTop + 1
+					}}
+				>
+					{this.bitPatterns(n, m, spacing)}
+				</div>
 
-			<div
+				<svg
+					width={numberOfDisks * spacing}
+					height={height - textTop + 5}
+					className={styles.arcs}
+					style={{
+						left: marginLeft + spacing,
+						top: textTop - 6
+					}}
+					fill="none"
+				>
+					{this.arcs(spacing, textTop)}
+				</svg>
+			</div>
+
+			<div className={styles.qubitLabels}
 				style={{
-					left: 8 + 0.5 * spacing,
+					top: textTop,
+					width: "100%"
+				}}
+			>
+				{this.qubitLabels(m, spacing)}
+			</div>
+
+			<div className={styles.loopStack}
+				style={{
 					top: textTop
 				}}
 			>
-				{this.qubitLabels(n)}
+				{this.loopStack(textTop)}
 			</div>
-
-			<div
-				width={width}
-				style={{
-					left: 54 + 0.5 * spacing,
-					top: textTop
-				}}
-			>
-				{this.bitPatterns(n, spacing)}
-			</div>
-
-			<svg
-				width={numberOfdisks * spacing}
-				height={height - textTop + 5}
-				className={styles.arcs}
-				style={{
-					left: 54 + spacing,
-					top: textTop - 6
-				}}
-				fill="none"
-			>
-				{this.arcs(spacing, textTop)}
-			</svg>
 		</div>
 	}
 
@@ -139,7 +163,7 @@ export class StateView extends PureComponent {
 		}
 
 		// add compass at end
-		const compassX = (amplitudes.length / 2 + 1) * spacing + 74
+		const compassX = (amplitudes.length / 2 + 1) * spacing + marginLeft + 20
 		result.push(
 			<g key="d">
 				<line
@@ -158,28 +182,74 @@ export class StateView extends PureComponent {
 		return result
 	}
 
-	qubitLabels(n) {
+	qubitLabels(n, spacing) {
 		const {props} = this
 		const {mask, value} = props.condition || {
 			mask: 0
 		}
+		const {labels} = props
 		const gates = props.gates || []
-		const bits = []
+		const rows = []
 		for (var b = 0; b < n; ++b) {
-			bits.push(
-				<div key={b} className={styles.qubitLabel}>
-					q<sub>{b}</sub>{
-						((mask >> b) & 1)
-							? `=${(value >> b) & 1}`
-							: (gates[b] && `←${gates[b] == 'N' ? '⨁': gates[b]}`)
-					}
-				</div>
+			let label = labels[b]
+			let subscript
+			if (label) {
+				const match = label.match(/(.*)#([0-9]*)/)
+				if (match) {
+					label = match[1]
+					subscript = match[2]
+				}
+			} else {
+				label = "q"
+				subscript = b
+			}
+			rows.push(
+				<tr key={b}>
+					<td>
+						<div style={{minWidth: marginLeft + spacing / 2 - 27}}>
+							{label}<sub>{subscript}</sub>
+						</div>
+					</td>
+					<td>
+						<div>{
+							((mask >> b) & 1)
+								? `=${(value >> b) & 1}`
+								: (gates[b] && `←${gates[b] == 'N' ? '⨁': gates[b]}`)
+						}</div>
+					</td>
+				</tr>
 			)
 		}
-		return bits
+		return <table>
+			<tbody>
+				{rows}
+				<tr><td height={6} colSpan={2}></td></tr>
+			</tbody>
+		</table>
 	}
 
-	bitPatterns(n, spacing) {
+	loopStack(textTop) {
+		const {loopStack} = this.props
+		const rows = []
+		for (var i = 0; i < loopStack.length; ++i) {
+			const loop = loopStack[i]
+			rows.push(
+				<tr key={i}>
+					<td style={{minWidth: textTop / 2}}>{loop.loopLabel ? loop.loopLabel : "loop"}:</td>
+					<td>{loop.count}</td>
+					<td>of</td>
+					<td>{loop.times}</td>
+				</tr>
+			)
+		}
+		return <table>
+			<tbody>
+				{rows}
+			</tbody>
+		</table>
+	}
+
+	bitPatterns(n, m, spacing) {
 		const {mask, value} = this.props.condition || {
 			mask: -1,
 			value: -1,
@@ -190,7 +260,7 @@ export class StateView extends PureComponent {
 				<BitVectorView
 					key={i}
 					i={i}
-					n={n}
+					n={m}
 					mask={mask}
 					value={value}
 					spacing={spacing}
@@ -272,7 +342,7 @@ class SvgDefs extends PureComponent {
 			<g id={styles.disk}>
 				<path
 					// 3 minor spokes
-					d="M0,0L-99,-5-99,5zM-5,99 5,99-5,-99 5,-99z"
+					d="M0,0L-99,-5V5zM-5,99h10L-5,-99H5z"
 					fill="#333"
 				/>
 				<circle
@@ -284,12 +354,12 @@ class SvgDefs extends PureComponent {
 				/>
 				<path
 					// main directional wedge
-					d="M0,0L99,-21 99,21z"
+					d="M0,0L99,-21V21z"
 					fill="#f44"
 				/>
 				<path
 					// main directional spoke
-					d="M0,0L99,-5 99,5z"
+					d="M0,0L99,-5V5z"
 					fill="#c00"
 				/>
 				<path
@@ -384,13 +454,16 @@ class DiskView extends PureComponent {
 	render() {
 		const {props} = this
 		const {a, b} = props
-		const radius = 2 * Math.sqrt(a*a + b*b)
-		const x = (props.i + 1) * props.spacing + 54
+		const probability = a*a + b*b
+		const radius = 2 * Math.sqrt(probability)
+		const x = (props.i + 1) * props.spacing + marginLeft
 		return <g>
 			{radius > 0.005 && <use
 				xlinkHref={`#${styles.disk}`}
 				transform={`translate(${x} ${axleY}) skewY(${props.circleSkewY}) scale(${radius * props.circleScaleX} ${radius}) rotate(${-180 / Math.PI * Math.atan2(b, a) + props.rotationDegrees})`}
-			/>}
+			>
+				<title>{Math.round(10000 * probability) / 100}%</title>
+			</use>}
 			<use
 				xlinkHref={`#${styles.axle}`}
 				transform={`translate(${x} ${axleY}) skewX(${props.axleSkewX})`}

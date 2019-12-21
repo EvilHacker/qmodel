@@ -33,7 +33,7 @@ export function load(key, defaultValue = undefined) {
  * only the last value will be actually stored.
  *
  * @param {string} key - the name of the local storage item
- * @param {*} value - the JSON value to store
+ * @param {*} value - the JSON value to store (or a function that returns the value)
  * @param {number} [delay] - milliseconds of delay before actually storing
  * @returns {undefined} void
  */
@@ -41,7 +41,11 @@ export function save(key, value, delay = 0) {
 	clearTimeout(delayedSaves[key])
 	delayedSaves[key] = setTimeout(() => {
 		try {
-			window.localStorage.setItem(key, JSON.stringify(value))
+			window.localStorage.setItem(key, JSON.stringify(
+				typeof value == "function"
+					? value()
+					: value
+			))
 		} finally {
 			delete delayedSaves[key]
 		}

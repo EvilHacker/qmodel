@@ -22,12 +22,16 @@
 
 .button {
 	width: 48px;
-	height: 38px;
+	height: 34px;
 	margin: 0 2px;
 	padding: 0;
 	overflow: hidden;
 	border-radius: 9px;
 	background-color: #ccd;
+}
+
+.button::-moz-focus-inner {
+	border: 0;
 }
 
 .button:hover {
@@ -42,7 +46,6 @@
 	height: 24px;
 	vertical-align: middle;
 	fill: #222;
-	filter: drop-shadow(0 1px 3px #fff);
 }
 
 .button:hover svg,
@@ -61,8 +64,9 @@
 	margin: 2px;
 	border: 1px solid #ccc;
 	white-space: pre;
+	tab-size: 4;
 	font: inherit;
-	overflow-x: scroll;
+	overflow: auto;
 	resize: both;
 	scroll-behavior: smooth;
 }
@@ -82,48 +86,93 @@
 }
 
 .gutter {
-	position: absolute;
-	box-sizing: border-box;
-	overflow: hidden;
-	border: 0;
-	border-right: 1px solid #ccc;
 	background-color: #8882;
 	text-align: right;
 	user-select: none;
 	cursor: cell;
+	color: #444;
 }
 
-.gutter > * {
+.gutterRow {
 	position: absolute;
 	right: 0;
-}
-
-.lineNumber {
 	width: 100%;
-	padding-right: 2px;
-	border-radius: 3px;
+	padding-right: 8px;
 }
 
-.lineNumber:hover {
-	background-color: #36f2;
+.lineNumber.selected::before {
+	content: "";
+	position: absolute;
+	box-sizing: border-box;
+	top: 0;
+	right: -2px;
+	width: 600px;
+	height: 19px;
+	background-color: #36f7;
+	border: 2px solid #36fc;
+	border-radius: 50%;
 }
 
-.lineNumber.selected {
-	margin-top: -1px;
-	border: solid #36fc;
-	border-width: 1px 0;
+.lineNumber:hover::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 600px;
+	height: 19px;
 	background-color: #36f5;
+	border-radius: 50%;
 }
 
-.pointer {
-	width: 100%;
-	border-radius: 0 50% 50% 0;
+.pointer > * {
 	background-color: #9da;
+}
+
+.pointer > *:last-child {
+	border-radius: 0 50% 50% 0;
+}
+
+.errorIndicator {
+	z-index: 2;
+	position: absolute;
+	top: 10px;
+	right: 0;
+	width: 6px;
+	height: 19px;
+	background-color: #e22;
+}
+
+.errorIndicator:hover {
+	right: -2px;
+	width: 10px;
+}
+
+.breakpointIndicator {
+	z-index: 1;
+	position: absolute;
+	top: 4px;
+	width: 11px;
+	height: 11px;
+	margin-right: -12px;
+	border-radius: 50%;
+}
+
+.breakpointIndicator:hover {
+	top: 3px;
+	margin-right: -13px;
+	border: 1px solid #800;
+}
+
+.breakpointIndicator.pause {
+	background-color: #eb0;
+}
+
+.breakpointIndicator.stop {
+	background-color: #e22;
 }
 
 .errorHighlight {
 	position: absolute;
-	right: 0;
 	background-color: #f001;
 	pointer-events: none;
 	user-select: none;
@@ -131,7 +180,7 @@
 
 .errorMessage {
 	position: absolute;
-	margin: 1px 6px;
+	margin: 0 6px;
 	padding: 1px 5px;
 	border: 1px solid #dbb;
 	border-radius: 3px;
@@ -151,6 +200,7 @@
 }
 
 .popup button {
+	display: block;
 	width: 100%;
 	padding: 3px 7px;
 	margin: 0;
@@ -158,12 +208,12 @@
 	background-color: inherit;
 }
 
-.popup button:hover {
+.popup button:enabled:hover {
 	color: #fff;
 	background-color: #48e;
 }
 
-.popup button:active {
+.popup button:enabled:active {
 	color: #fff;
 	background-color: #36c;
 }

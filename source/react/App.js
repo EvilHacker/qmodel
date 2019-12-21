@@ -8,14 +8,14 @@ import React, { PureComponent } from 'react'
 import { load, save } from '../util/LocalStorage'
 import { QuantumOpTransition } from './QuantumOpTransition'
 import { QuantumProgramView } from './QuantumProgramView'
-import { Simulator } from '../quantum/Simulator'
+import { Simulator, compiledOp } from '../quantum/Simulator'
 import Github from './github.svg'
 import styles from './App.css'
 
 const maxQubits = 10
 
 const defaultProgram =
-`HHHH,     1/2
+`HHHH
 1---,     1/2
  1--,     1/4
   1-,     1/8
@@ -36,8 +36,6 @@ export class App extends PureComponent {
 
 		this.state = {
 			count: 0,
-			rotation: 0,
-			showSettings: false,
 			numberOfQubits: numberOfQubits,
 			directionMode: directionMode,
 			transitionMode: transitionMode,
@@ -45,44 +43,76 @@ export class App extends PureComponent {
 			transitionSpeed: transitionSpeed,
 			nextTransitionSpeed: transitionSpeed,
 		}
-
-		this.sim = new Simulator(numberOfQubits)
+		this.onReset()
 	}
 
-	onOp = (op, rotation) => {
-		op = this.sim.compiledOp(op)
-		if (op.minLength > maxQubits) {
-			throw `${op.minLength} qubits is more than max of ${maxQubits}`
+	onRun = (ops, onDone) => {
+		if (!ops.length) {
+			// no ops to run now, but continue after render and a short pause
+			setTimeout(onDone, 250)
+			return
 		}
 
-		this.sim.do(op, rotation)
-
 		const {state} = this
+
+		// perform all the operations
+		const {nextState} = state
+		const previousState = state.transitionMode == "simple"
+			? new Simulator(nextState)
+			: null
+		ops.forEach(op => nextState.do(op.op = compiledOp(op.op), op.rotation))
+
 		this.setState({
 			count: state.count + 1,
-			op: op,
-			rotation: rotation,
+			previousState,
+			nextState,
+			ops,
+			onDone,
 			transitionMode: state.nextTransitionMode,
 			transitionSpeed: state.nextTransitionSpeed,
+			transitioning: true,
 		})
 	}
 
-	onReset = () => {
+	onStop = () => {
 		const {state} = this
-		this.sim = new Simulator(state.numberOfQubits)
+		if (state.transitioning) {
+			// stop at the end of the current operation
+			this.setState({
+				onDone: null,
+			}, this.onDone)
+		}
+	}
+
+	onReset = () => {
+		// reset to the beginning of the program
+		const {state} = this
 		this.setState({
 			count: state.count + 1,
-			op: null,
-			rotation: 0,
-			showSettings: false
+			previousState : null,
+			nextState: new Simulator(state.numberOfQubits),
+			labels: [],
+			nextLabels: [],
+			loopStack: [],
+			nextLoopStack: [],
+			ops: null,
+			onDone: null,
+			showSettings: false,
+			transitioning: false,
 		})
 	}
 
 	onDone = () => {
+		const {state} = this
+		const {onDone} = state
 		this.setState({
-			op: null,
-			rotation: 0
-		})
+			previousState : null,
+			labels: state.nextLabels,
+			loopStack: state.nextLoopStack,
+			ops: null,
+			onDone: null,
+			transitioning: false,
+		}, onDone)
 	}
 
 	onSettings = () => {
@@ -96,13 +126,48 @@ export class App extends PureComponent {
 		save("program", program, 2000)
 	}
 
-	onNumberOfQubits = event => {
-		const numberOfQubits = Number(event.target.value)
-		if (numberOfQubits > this.sim.numberOfQubits) {
-			this.sim = new Simulator(this.sim)
-			this.sim.expandState(numberOfQubits)
+	onLabelsChanged = labels => {
+		// update state only if labels have changed
+		const currentLabels = this.state.nextLabels
+		for (let i = Math.max(labels.length, currentLabels.length) - 1; i >= 0; --i) {
+			if (labels[i] != currentLabels[i]) {
+				// update the labels after the current operation
+				this.setState({
+					nextLabels: labels
+				})
+
+				if (!this.state.transitioning) {
+					// update the labels immediately
+					this.setState({
+						labels
+					})
+				}
+
+				break
+			}
 		}
+	}
+
+	onLoopStackChanged = loopStack => {
+		const loopStackCopy = loopStack.map(loop => ({...loop}))
+
+		// update the loop stack after the current operation
 		this.setState({
+			nextLoopStack: loopStackCopy
+		})
+
+		if (!this.state.transitioning) {
+			// update the loop stack immediately
+			this.setState({
+				loopStack: loopStackCopy
+			})
+		}
+	}
+
+	onNumberOfQubits = event => {
+		const numberOfQubits = +event.target.value
+		this.setState({
+			count: this.state.count + this.state.nextState.expandState(numberOfQubits),
 			numberOfQubits: numberOfQubits
 		})
 		save("numberOfQubits", numberOfQubits)
@@ -167,25 +232,25 @@ export class App extends PureComponent {
 							<td>Transition:</td>
 							<td>
 								<select
-									value={state.nextTransitionMode}
-									onChange={this.onTransitionMode}
-								>
-									<option value="simple">Simple</option>
-									<option value="accurate">Accurate</option>
-								</select>
-								{" "}
-								<select
 									value={state.nextTransitionSpeed}
 									onChange={this.onTransitionSpeed}
 								>
 									<option value="fast">Fast</option>
 									<option value="slow">Slow</option>
 								</select>
+								{" & "}
+								<select
+									value={state.nextTransitionMode}
+									onChange={this.onTransitionMode}
+								>
+									<option value="simple">Simple</option>
+									<option value="accurate">Accurate</option>
+								</select>
 							</td>
 						</tr>
 					</tbody>
 				</table>
-				<div /* call-out arrow */ />
+				<div /* call-out arrow */ onClick={this.onSettings} />
 			</div>
 		}
 
@@ -194,12 +259,15 @@ export class App extends PureComponent {
 
 			<div className={styles.quantumState}>
 				<QuantumOpTransition
-					sim={this.sim}
-					op={state.op}
-					rotation={state.rotation}
+					count={state.count}
+					previousState={state.previousState}
+					nextState={state.nextState}
+					ops={state.ops}
+					labels={state.labels}
+					loopStack={state.loopStack}
 					directionMode={state.directionMode}
 					transitionMode={state.transitionMode}
-					transitionSpeed={state.transitionSpeed}
+					fullRotationTime={state.transitionSpeed == "slow" ? 8000 : 2000}
 					onDone={this.onDone}
 				/>
 			</div>
@@ -207,10 +275,14 @@ export class App extends PureComponent {
 			<div className={styles.program}>
 				<QuantumProgramView
 					defaultValue={this.program}
-					onOp={this.onOp}
+					maxQubits={maxQubits}
+					onRun={this.onRun}
+					onStop={this.onStop}
 					onReset={this.onReset}
 					onSettings={this.onSettings}
 					onProgramChanged={this.onProgramChanged}
+					onLabelsChanged={this.onLabelsChanged}
+					onLoopStackChanged={this.onLoopStackChanged}
 				/>
 
 				{settings}

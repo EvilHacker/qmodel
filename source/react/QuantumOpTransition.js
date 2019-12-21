@@ -8,73 +8,48 @@ import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import { Transition, easeSinusoidalInOut } from './Transition'
 import { StateView } from './QuantumStateView'
-import { Simulator, Operation, noop } from '../quantum/Simulator'
-import { tween } from '../quantum/State'
+import { Simulator, Operation, compiledOp } from '../quantum/Simulator'
+import { tween } from '../quantum/state'
 
 export class QuantumOpTransition extends PureComponent {
 	static propTypes = {
-		sim: PropTypes.instanceOf(Simulator).isRequired,
-		op: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Operation)]),
-		rotation: PropTypes.number,
+		count: PropTypes.number,
+		previousState: PropTypes.instanceOf(Simulator),
+		nextState: PropTypes.instanceOf(Simulator).isRequired,
+		ops: PropTypes.arrayOf(PropTypes.shape({
+			op: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Operation)]),
+			rotation: PropTypes.number,
+		})),
+		labels: PropTypes.arrayOf(PropTypes.string),
+		loopStack: PropTypes.arrayOf(PropTypes.shape({
+			loopLabel: PropTypes.string,
+			count: PropTypes.number,
+			times: PropTypes.number,
+		})),
 		directionMode: PropTypes.oneOf(["compass", "complex"]),
 		transitionMode: PropTypes.oneOf(["simple", "accurate"]),
-		transitionSpeed: PropTypes.oneOf(["fast", "slow"]),
+		fullRotationTime: PropTypes.number, // in milliseconds
 		onDone: PropTypes.func, // () => undefined
-	}
-
-	static defaultProps = {
-		op: noop,
-		rotation: 0,
 	}
 
 	render() {
 		const {props} = this
-		const {sim: nextState, directionMode, onDone} = props
+		const {
+			count,
+			previousState,
+			nextState,
+			directionMode,
+			fullRotationTime,
+			onDone
+		} = props
+		const ops = props.ops || []
 
-		if (props.op == null || props.op == noop) {
-			// no operation to animate
-			return <Transition duration={0} onDone={onDone} render={() => {
-				return <StateView
-					amplitudes={nextState.amplitudes}
-					directionMode={directionMode}
-				/>
-			}}/>
-		}
-
-		const op = nextState.compiledOp(props.op)
-		const {rotation} = props
-		const rotationTime = props.transitionSpeed == "slow" ? 8000 : 2000
-
-		if (props.transitionMode == "simple") {
-			// interpolate between the previous state and the next state
-			const previousState = new Simulator(nextState)
-			previousState.do(op, -rotation)
-			const duration = 1000 + rotationTime * (Math.abs(rotation) % 1)
-			const getAmplitudes = tween(previousState.amplitudes, nextState.amplitudes)
+		if (props.transitionMode == "accurate" && ops.length) {
+			// gradually rotate from the previous state to the next state using the operation(s)
+			const duration = 1000 + fullRotationTime *
+				ops.reduce((rotation, op) => Math.max(rotation, Math.abs(op.rotation)), 0)
 			return <Transition
-				duration={duration}
-				onDone={onDone}
-				ease={easeSinusoidalInOut}
-				render={t => {
-					let condition = undefined
-					let gates = undefined
-					if (t < 1) {
-						// still haven't reached the next state - show operation condition and gates
-						condition = op.getCondition()
-						gates = op.getGates()
-					}
-					return <StateView
-						amplitudes={getAmplitudes(t)}
-						condition={condition}
-						gates={gates}
-						directionMode={directionMode}
-					/>
-				}}
-			/>
-		} else {
-			// gradually rotate from the previous state to the next state using the operation
-			const duration = 1000 + rotationTime * Math.abs(rotation)
-			return <Transition
+				count={count}
 				duration={duration}
 				onDone={onDone}
 				ease={easeSinusoidalInOut}
@@ -86,14 +61,65 @@ export class QuantumOpTransition extends PureComponent {
 					if (t < 1) {
 						// still haven't reached the next state - rotate a bit more
 						state = new Simulator(state)
-						state.do(op, (t - 1) * rotation)
-						condition = op.getCondition()
-						gates = op.getGates()
+						ops.forEach(op => {
+							state.do(op.op = compiledOp(op.op), (t - 1) * op.rotation)
+						})
+						if (ops.length == 1) {
+							// show condition and gates of sole operation
+							condition = ops[0].op.getCondition()
+							gates = ops[0].op.getGates()
+						}
 					}
 					return <StateView
 						amplitudes={state.amplitudes}
+						labels={props.labels}
+						loopStack={props.loopStack}
 						condition={condition}
 						gates={gates}
+						directionMode={directionMode}
+					/>
+				}}
+			/>
+		} else if (previousState) {
+			// interpolate between the previous state and the next state
+			const duration = 1000 + fullRotationTime *
+				ops.reduce((rotation, op) => Math.max(rotation, Math.abs(op.rotation) % 1), 0)
+			const getAmplitudes = tween(previousState.amplitudes, nextState.amplitudes)
+			previousState.expandState(nextState.numberOfQubits)
+			return <Transition
+				count={count}
+				duration={duration}
+				onDone={onDone}
+				ease={easeSinusoidalInOut}
+				render={t => {
+					let condition = undefined
+					let gates = undefined
+					if (t < 1 && ops.length == 1) {
+						// still haven't reached the next state - show condition and gates of sole operation
+						condition = ops[0].op.getCondition()
+						gates = ops[0].op.getGates()
+					}
+					return <StateView
+						amplitudes={getAmplitudes(t)}
+						labels={props.labels}
+						loopStack={props.loopStack}
+						condition={condition}
+						gates={gates}
+						directionMode={directionMode}
+					/>
+				}}
+			/>
+		} else {
+			// no operation to animate
+			return <Transition
+				count={count}
+				duration={0}
+				onDone={onDone}
+				render={() => {
+					return <StateView
+						amplitudes={nextState.amplitudes}
+						labels={props.labels}
+						loopStack={props.loopStack}
 						directionMode={directionMode}
 					/>
 				}}

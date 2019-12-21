@@ -19,6 +19,7 @@ export function easeQuadraticInOut(t) {
 
 export class Transition extends Component {
 	static propTypes = {
+		count: PropTypes.number,
 		duration: PropTypes.number.isRequired, // in milliseconds
 		render: PropTypes.func.isRequired, // (t: number) => React.ReactElement
 		ease: PropTypes.func, // (t: number) => number
@@ -26,7 +27,7 @@ export class Transition extends Component {
 	}
 
 	static defaultProps = {
-		ease: t => t,
+		ease: t => t, // linear by default
 	}
 
 	state = {
@@ -35,7 +36,7 @@ export class Transition extends Component {
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {
-		if (this.props !== nextProps) {
+		if (nextProps.count == null || this.props.count != nextProps.count) {
 			// note: mutate nextState to be compatible with preact
 			nextState.startTime = +new Date
 			if (nextProps.duration <= 0) {
@@ -50,11 +51,12 @@ export class Transition extends Component {
 	}
 
 	componentDidMount() {
-		const {state} = this
-		if (state.tween < 1) {
-			requestAnimationFrame(() => {
+		window.cancelAnimationFrame(this.animationFrameId)
+		if (this.state.tween < 1) {
+			this.animationFrameId = requestAnimationFrame(() => {
+				this.animationFrameId = undefined
 				const {props} = this
-				let tween = (+new Date - state.startTime) / props.duration
+				let tween = (+new Date - this.state.startTime) / props.duration
 				let callback = undefined
 				if (tween >= 1) {
 					// transition is done
