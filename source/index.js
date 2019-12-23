@@ -11,6 +11,7 @@ import { installPolyfills } from './polyfills/installPolyfills'
 import React from 'react'
 import { render } from 'react-dom'
 import { App } from './react/App'
+import './favicon.ico'
 
 // install polyfills (if needed) then start the app
 installPolyfills(() => {

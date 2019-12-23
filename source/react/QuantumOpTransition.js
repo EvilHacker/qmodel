@@ -28,7 +28,7 @@ export class QuantumOpTransition extends PureComponent {
 		})),
 		directionMode: PropTypes.oneOf(["compass", "complex"]),
 		transitionMode: PropTypes.oneOf(["simple", "accurate"]),
-		fullRotationTime: PropTypes.number, // in milliseconds
+		fullRotationTime: PropTypes.number, // milliseconds to complete one full rotation
 		onDone: PropTypes.func, // () => undefined
 	}
 
@@ -61,9 +61,10 @@ export class QuantumOpTransition extends PureComponent {
 					if (t < 1) {
 						// still haven't reached the next state - rotate a bit more
 						state = new Simulator(state)
-						ops.forEach(op => {
+						for (let i = ops.length - 1; i >= 0; --i) {
+							const op = ops[i]
 							state.do(op.op = compiledOp(op.op), (t - 1) * op.rotation)
-						})
+						}
 						if (ops.length == 1) {
 							// show condition and gates of sole operation
 							condition = ops[0].op.getCondition()

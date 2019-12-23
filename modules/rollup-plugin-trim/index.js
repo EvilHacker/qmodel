@@ -6,7 +6,7 @@
  * TODO: handle source map
  */
 
-module.exports = function stylelintPlugin(options = {}) {
+module.exports = function trimPlugin(options = {}) {
 	const {trimIife} = {
 		trimIife: false,
 		...options

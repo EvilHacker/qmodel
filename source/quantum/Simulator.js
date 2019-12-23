@@ -28,9 +28,9 @@ function h(n) {
  * Normalize the supplied op (operation string) by:
  * - removing comments, whitespace, and ignored qubits;
  * - accepting lower-case characters;
- * - accepting alternative characters: "│|_⨁⊕+".
+ * - accepting alternative characters: "┼│|○●⨁⊕+".
  *
- * Return a string with only these characters: '-', 0', '1', 'H', 'N', 'X', 'Y'.
+ * Return a string with only these characters: '-', '0', '1', 'H', 'N', 'X', 'Y'.
  * Throw an exception if the operation string is invalid.
  *
  * @param {string} op - a human-written operation string
@@ -45,63 +45,58 @@ export function normalizeOp(op) {
 	var normOp = ""
 	var i = 0
 
-	// trim leading '|', '-', '_', and whitespace
-	while (i < op.length && (op.charCodeAt(i) <= 32 || "-_|│".includes(op[i]))) {
+	// trim leading "-|│┼", and whitespace
+	while (i < op.length && (op.charCodeAt(i) <= 32 || "-|│┼".includes(op[i]))) {
 		++i
 	}
 
 	// normalize remaining characters and check for errors
 	while (i < op.length) {
-		if (op.charCodeAt(i) <= 32) {
-			// skip whitespace
-			++i
-			continue
+		// get the next character in the op
+		const c = op[i++]
+
+		// look-up normalized equivalent of the character
+		const normC = {
+			'-': '-',
+			'|': '-',
+			'│': '-',
+			'┼': '-',
+
+			'0': '0',
+			'○': '0',
+
+			'1': 1,
+			'●': 1,
+
+			'H': 'H',
+			'h': 'H',
+
+			'N': 'N',
+			'n': 'N',
+			'+': 'N',
+			'⊕': 'N',
+			'⨁': 'N',
+
+			'X': 'X',
+			'x': 'X',
+
+			'Y': 'Y',
+			'y': 'Y',
+		}[c]
+
+		if (!normC) {
+			if (c.charCodeAt(0) <= 32) {
+				// skip over whitespace
+				continue
+			}
+			if (c == '#' || (c == '/' && op[i] == '/')) {
+				// comment till end of string - done
+				break
+			}
+			throw `Invalid character '${c}' in operation`
 		}
 
-		switch (op[i]) {
-			case '│':
-			case '|':
-			case '-':
-			case '_':
-				normOp += '-'
-				break
-			case '0':
-			case '1':
-				normOp += op[i]
-				break
-			case 'H':
-			case 'h':
-				normOp += 'H'
-				break
-			case '⨁':
-			case '⊕':
-			case '+':
-			case 'N':
-			case 'n':
-				normOp += 'N'
-				break
-			case 'X':
-			case 'x':
-				normOp += 'X'
-				break
-			case 'Y':
-			case 'y':
-				normOp += 'Y'
-				break
-			case '#':
-				// # comment
-				return normOp
-			case '/':
-				if (op[i + 1] == '/') {
-					// // comment
-					return normOp
-				}
-				// fallthrough...
-			default:
-				throw `Invalid character '${op[i]}' in operation`
-		}
-
-		++i
+		normOp += normC
 	}
 
 	return normOp

@@ -34,7 +34,7 @@ module.exports = {
 					useObjectAssign: isProd,
 					expectedHelpers: isProd ? [
 						// these are the only helpers expected in a production build
-						"assertThisInitialized", // inlined noop
+						"assertThisInitialized", // inlined no-op
 						"defineProperty", // inlined
 						"extends", // replaced with Object.assign
 						"inheritsLoose",

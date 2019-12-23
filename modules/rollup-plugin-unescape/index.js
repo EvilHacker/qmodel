@@ -11,7 +11,7 @@
 
 const unescapeUnicodeHex = (_, hex) => String.fromCharCode(parseInt(hex, 16))
 
-module.exports = function stylelintPlugin() {
+module.exports = function unescapePlugin() {
 	return {
 		name: 'unescape',
 

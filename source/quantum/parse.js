@@ -117,7 +117,7 @@ export function parseLabelledBits(label, bits) {
 			labels[bit++] = `${label}#${subscript++}`
 		} else if (char.charCodeAt(0) <= 32) {
 			// skip over whitespace
-		} else if ("-_|│".includes(char)) {
+		} else if ("-|│┼".includes(char)) {
 			// skip over this bit
 			++bit
 		} else {

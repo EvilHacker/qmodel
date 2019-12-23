@@ -11,8 +11,8 @@ import commonjs from 'rollup-plugin-commonjs'
 import alias from 'rollup-plugin-alias'
 import html from './modules/rollup-plugin-html-entry/index'
 import postcss from 'rollup-plugin-postcss'
+import asset from 'rollup-plugin-smart-asset'
 import svgr from '@svgr/rollup'
-import copy from "rollup-plugin-copy-assets"
 import serve from 'rollup-plugin-live-server'
 
 // build options derived from environment variables:
@@ -110,7 +110,10 @@ const plugins = [
 			indent_with_tabs: true, // eslint-disable-line camelcase
 		}),
 	] : [],
-	"placeholderForCopy",
+	asset({
+		url: "copy",
+		extensions: [ ".ico", ".png", ".gif", ".jpg" ],
+	}),
 	...serverPort ? [
 		"placeholderForWebServer",
 	] : [],
@@ -172,14 +175,6 @@ export default [
 				return [
 					trim({
 						trimIife: true // remove iife wrapper
-					})
-				]
-			} else if (plugin === "placeholderForCopy") {
-				return [
-					copy({
-						assets: [
-							"source/favicon.ico",
-						]
 					})
 				]
 			} else if (plugin === "placeholderForWebServer") {

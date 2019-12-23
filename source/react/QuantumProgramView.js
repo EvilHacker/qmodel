@@ -68,17 +68,12 @@ export class QuantumProgramView extends PureComponent {
 		let lineIndex = pointer + pointerToLineOffset
 		let endLineIndex = targetPointer + pointerToLineOffset
 
-		if (lineIndex + direction < 0 || lineIndex + direction >= programLines.length) {
-			// don't go beyond beginning/end of program
-			return
-		}
+		const loopName = line => line.loopLabel
+			? `loop ${JSON.stringify(line.loopLabel)}`
+			: "loop"
 
-		const maxOps = 50
-		const opsToRun = []
 		let errorLineNumber = null
 		let errorMessage = null
-		const {loopStack} = this
-		let loopStackChanged = false
 
 		const error = message => {
 			errorLineNumber = lineIndex
@@ -86,9 +81,7 @@ export class QuantumProgramView extends PureComponent {
 			lineIndex -= direction
 		}
 
-		const loopName = line => line.loopLabel
-			? `loop ${JSON.stringify(line.loopLabel)}`
-			: "loop"
+		const loopNotStartedError = line => error(`${loopName(line)} was not started previously`)
 
 		const findOtherEndOfLoop = loopLine => {
 			const {type, loopLabel} = loopLine
@@ -119,7 +112,18 @@ export class QuantumProgramView extends PureComponent {
 			return i
 		}
 
-		while (true) { // eslint-disable-line no-constant-condition
+		const maxOps = 50
+		const opsToRun = []
+		const {loopStack} = this
+		let loopStackChanged = false
+
+		// collect ops until we hit
+		//  • the target
+		//  • a loop/repeat,
+		//  • a breakpoint,
+		//  • an error, or
+		//  • the beginning/end of the program
+		while (lineIndex >= 0 && lineIndex < programLines.length - 1) {
 			const line = programLines[lineIndex]
 			lineIndex += direction
 			const {type} = line
@@ -132,7 +136,7 @@ export class QuantumProgramView extends PureComponent {
 					break
 				}
 			} else if (type == "loop") {
-				// forward or backward
+				// forward or backward ?
 				if (direction > 0) {
 					if (line.times < 1) {
 						// find the end of the loop (repeat)
@@ -158,8 +162,8 @@ export class QuantumProgramView extends PureComponent {
 						if (line.times < 1) {
 							// loop 0 times
 						} else {
-							// loop was not started
-							error(`${loopName(line)} was not started previously`)
+							// error - loop was not started
+							loopNotStartedError(line)
 						}
 					} else {
 						const loop = loopStack[loopStackIndex]
@@ -182,14 +186,14 @@ export class QuantumProgramView extends PureComponent {
 				}
 				break
 			} else if (type == "repeat") {
-				// forward or backward
+				// forward or backward ?
 				if (direction > 0) {
 					// repeat or end the loop
 					const loopStackIndex = findLastIndex(loopStack,
 						loop => loop.loopLabel == line.loopLabel)
 					if (loopStackIndex < 0) {
-						// loop was not started
-						error(`${loopName(line)} was not started previously`)
+						// error - loop was not started
+						loopNotStartedError(line)
 					} else {
 						const loop = loopStack[loopStackIndex]
 						if (loop.count < loop.times) {
@@ -279,7 +283,7 @@ export class QuantumProgramView extends PureComponent {
 
 		this.setPointer(lineIndex - pointerToLineOffset)
 
-		// check if have NOT yet reached target or beginning/end of program
+		// check if have NOT hit an error, NOR are single-stepping, NOR reached the target
 		let callback
 		if (!errorMessage && !singleStep && lineIndex != endLineIndex) {
 			// callback to continue running later
@@ -445,7 +449,7 @@ export class QuantumProgramView extends PureComponent {
 					const rotation = matches[4]
 					if (label != null) {
 						if (rotation != null) {
-							throw "Unexpected rotation (after ',') and label (after ':')"
+							throw "Unexpected rotation (after ',') AND label (after ':')"
 						}
 						const labels = parseLabelledBits(label, bits)
 						if (labels.length > maxQubits) {
@@ -750,7 +754,12 @@ export class QuantumProgramView extends PureComponent {
 						{i + 1}
 					</div>
 					<div
-						className={`${styles.breakpointIndicator} ${styles[line.breakpoint]}`}
+						className={
+							{
+								pause: `${styles.breakpointIndicator} ${styles.pause}`,
+								stop:  `${styles.breakpointIndicator} ${styles.stop}`,
+							}[line.breakpoint] || styles.breakpointIndicator
+						}
 						style={{
 							right: gutterWidth,
 						}}
@@ -900,7 +909,6 @@ export class QuantumProgramView extends PureComponent {
 								fontSize: fontSizePx,
 								padding: padding,
 								paddingLeft: state.gutterWidth + characterWidth,
-								// overflow: "auto",
 							}}
 							onChange={this.onUpdateProgramText}
 							onScroll={this.onUpdateScrollPosition}

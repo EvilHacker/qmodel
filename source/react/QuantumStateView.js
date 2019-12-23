@@ -119,7 +119,6 @@ export class StateView extends PureComponent {
 			<div className={styles.qubitLabels}
 				style={{
 					top: textTop,
-					width: "100%"
 				}}
 			>
 				{this.qubitLabels(m, spacing)}
@@ -194,7 +193,7 @@ export class StateView extends PureComponent {
 			let label = labels[b]
 			let subscript
 			if (label) {
-				const match = label.match(/(.*)#([0-9]*)/)
+				const match = label.match(/^(.*)#([0-9]+)$/)
 				if (match) {
 					label = match[1]
 					subscript = match[2]
