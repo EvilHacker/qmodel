@@ -11,6 +11,7 @@
 .quantumState {
 	position: relative;
 	overflow-x: scroll;
+	overflow-y: hidden;
 	font-family: Courier, monospace;
 	user-select: none;
 }
@@ -41,12 +42,14 @@
 
 .direction {
 	position: absolute;
-	opacity: 0;
-	appearance: none;
+	height: 7px;
 	outline: none;
+	margin: 0;
+	padding: 0;
+	opacity: 0;
 	background: #28f;
-	height: 6px;
 	border-radius: 3px;
+	appearance: none;
 	transform: rotate(-90deg);
 	transition: 0.3s;
 }
@@ -81,7 +84,7 @@
 
 .qubitLabels td {
 	padding: 0;
-	background-color: #fffe;
+	background: #fffe;
 }
 
 .qubitLabels td:first-child {
@@ -92,7 +95,7 @@
 	min-width: 4px;
 	font-weight: 700;
 	color: #30b;
-	background-color: #fffc;
+	background: #fffc;
 }
 
 .qubitLabels div {
@@ -108,7 +111,7 @@
 	font-family: Menlo, "Lucida Console", monospace;
 	font-size: 15px;
 	text-align: right;
-	background-color: #fffc;
+	background: #fffc;
 	transform: rotate(-90deg);
 	transform-origin: left top;
 	transition: 0.7s;
@@ -122,7 +125,6 @@
 
 .binary {
 	position: absolute;
-	padding-bottom: 2px;
 	border-radius: 4px;
 	text-align: center;
 	transition: background-color 0.4s, 0.7s;
@@ -139,7 +141,7 @@
 }
 
 .one {
-	background-color: #1143;
+	background: #1143;
 }
 
 .decimal {
@@ -153,13 +155,13 @@
 }
 
 .select {
-	background-color: #fe07;
+	background: #fe07;
 }
 
 .match {
 	font-weight: 700;
 	color: #040;
-	background-color: #8f07;
+	background: #8f07;
 	transition: background-color 80ms;
 }
 

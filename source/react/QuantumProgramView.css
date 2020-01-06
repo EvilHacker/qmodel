@@ -5,141 +5,192 @@
  */
 
 .program {
+	border-collapse: collapse;
+	border-spacing: 0;
+	padding: 0;
 	font-family: "Courier New", Courier, monospace;
 }
 
-.program td {
-	margin: 0;
-	padding: 1px;
-	border: 0;
+.program tr:first-child,
+.program tr:first-child td {
+	height: 32px;
+	background-image: linear-gradient(#e4e4e4, #f4f4f4);
 }
 
-.program button {
-	border: 0;
+.program td {
+	position: relative;
+	padding: 0;
+}
+
+.verticalFill {
+	height: 100%;
+}
+
+.buttonBar {
+	display: table;
+	width: 100%;
+}
+
+.buttonBar > * {
+	display: table-cell;
+}
+
+.buttonBar > *:last-child {
+	padding-right: 4px;
+	text-align: right;
+}
+
+.buttonBar button {
+	width: 48px;
+	height: 32px;
+	overflow: hidden;
 	outline: 0;
+	margin-right: 4px;
+	border: 0;
+	padding: 0;
+	background: #fff0;
 	transition: 0.2s;
 }
 
-.button {
-	width: 48px;
-	height: 34px;
-	margin: 0 2px;
-	padding: 0;
-	overflow: hidden;
-	border-radius: 9px;
-	background-color: #ccd;
-}
-
-.button::-moz-focus-inner {
+.buttonBar button::-moz-focus-inner {
 	border: 0;
 }
 
-.button:hover {
-	background-color: #6ad;
+.buttonBar button:hover {
+	background: #8ac;
 }
 
-.button:active {
-	background-color: #48b;
+.buttonBar button:active {
+	background: #58b;
 }
 
-.button svg {
+.buttonBar svg {
 	height: 24px;
 	vertical-align: middle;
-	fill: #333;
+	fill: #444;
 }
 
-.button:hover svg,
-.button:active svg {
+.buttonBar button:hover svg,
+.buttonBar button:active svg {
 	fill: #eee;
 	filter: drop-shadow(0 1px 3px #000);
 }
 
 .editor {
-	position: relative;
+	width: 100%;
+	height: 100%;
 }
 
 .editor textarea {
-	min-width: 197px;
-	min-height: 197px;
-	margin: 2px;
-	border: 1px solid #ccc;
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	box-shadow: none;
+	outline: none;
+	margin: 0;
+	border: 0;
+	padding: 4px 0 0 4px;
+	overflow: auto;
+	resize: none;
+	scroll-behavior: smooth;
 	white-space: pre;
 	tab-size: 4;
 	font: inherit;
-	overflow: auto;
-	resize: both;
-	scroll-behavior: smooth;
-}
-
-.textOverlay {
-	position: absolute;
-	top: 4px;
-	left: 4px;
-	right: 4px;
-	overflow: hidden;
-	pointer-events: none;
-}
-
-.textOverlay > * {
-	position: absolute;
-	pointer-events: auto;
 }
 
 .gutter {
-	background-color: #8882;
-	text-align: right;
+	position: relative;
+	height: 100%;
+	background: #f4f4f4;
+}
+
+.overlay {
+	position: absolute;
+	top: 0;
+	left: -1000px;
+	width: 10000px;
+	height: 100%;
+	overflow: hidden;
+	pointer-events: none;
 	user-select: none;
-	cursor: cell;
-	color: #444;
+}
+
+.overlay > div {
+	z-index: 1;
+	position: absolute;
+	left: 1000px;
+	height: 100%;
+	margin-top: 4px;
+	pointer-events: all;
 }
 
 .gutterRow {
 	position: absolute;
-	right: 0;
 	width: 100%;
-	padding-right: 8px;
 }
 
-.lineNumber.selected::before {
-	content: "";
+.lineNumber {
+	z-index: 2;
 	position: absolute;
-	box-sizing: border-box;
-	top: 0;
-	right: -2px;
-	width: 600px;
-	height: 19px;
-	background-color: #36f7;
-	border: 2px solid #36fc;
-	border-radius: 50%;
+	left: 0;
+	right: 0;
+	padding-right: 8px;
+	text-align: right;
+	color: #999;
 }
 
 .lineNumber:hover::before {
 	content: "";
 	position: absolute;
-	top: 0;
-	right: 0;
-	width: 600px;
-	height: 19px;
-	background-color: #36f5;
+	top: 5px;
+	left: -3px;
+	right: -3px;
+	height: 9px;
+	background: #36f5;
 	border-radius: 50%;
 }
 
+.lineNumber.selected::before {
+	content: "";
+	position: absolute;
+	top: 5px;
+	left: -3px;
+	right: -3px;
+	height: 5px;
+	background: #36f7;
+	border: 2px solid #36f9;
+	border-radius: 50%;
+}
+
+.pointer {
+	position: absolute;
+}
+
 .pointer > * {
-	background-color: #9da;
+	position: absolute;
+	background: #9da;
+}
+
+.pointer > *:first-child {
+	left: -1000px;
+	width: 10000px;
+	height: 1px;
 }
 
 .pointer > *:last-child {
-	border-radius: 0 50% 50% 0;
+	left: -8px;
+	padding-right: 16px;
+	border-radius: 50%;
 }
 
 .errorIndicator {
-	z-index: 2;
+	z-index: 3;
 	position: absolute;
 	top: 10px;
 	right: 0;
 	width: 6px;
 	height: 19px;
-	background-color: #e22;
+	background: #e22;
 }
 
 .errorIndicator:hover {
@@ -148,73 +199,183 @@
 }
 
 .breakpointIndicator {
-	z-index: 1;
+	z-index: 3;
 	position: absolute;
 	top: 4px;
+	left: 2px;
 	width: 11px;
 	height: 11px;
-	margin-right: -12px;
 	border-radius: 50%;
 }
 
 .breakpointIndicator:hover {
 	top: 3px;
-	margin-right: -13px;
+	left: 1px;
 	border: 1px solid #800;
 }
 
 .breakpointIndicator.pause {
-	background-color: #eb0;
+	background: #eb0;
 }
 
 .breakpointIndicator.stop {
-	background-color: #e22;
+	background: #e22;
 }
 
 .errorHighlight {
 	position: absolute;
-	background-color: #f001;
+	background: #f001;
 	pointer-events: none;
 	user-select: none;
 }
 
 .errorMessage {
 	position: absolute;
-	margin: 0 6px;
 	padding: 1px 5px;
 	border: 1px solid #dbb;
 	border-radius: 3px;
 	color: #a00;
-	background-color: #eeee;
+	background: #eeee;
 	box-shadow: 2px 4px 8px #0004;
 }
 
 .popup {
+	z-index: 4;
 	position: absolute;
 	margin: 1px;
 	padding: 1px 0;
 	border: 1px solid #ccc;
 	border-radius: 3px;
-	background-color: #eee;
+	background: #eee;
 	box-shadow: 2px 4px 8px #0004;
+	white-space: nowrap;
 }
 
 .popup button {
 	display: block;
 	width: 100%;
-	padding: 3px 7px;
+	border: 0;
+	outline: 0;
 	margin: 0;
+	padding: 3px 7px;
 	text-align: left;
 	font-size: 90%;
-	background-color: inherit;
+	background: inherit;
+	pointer-events: all;
 }
 
 .popup button:enabled:hover {
 	color: #fff;
-	background-color: #48e;
+	background: #48e;
 }
 
 .popup button:enabled:active {
 	color: #fff;
-	background-color: #36c;
+	background: #36c;
+}
+
+.circuitLabels {
+	width: 1%;
+	min-width: 220px;
+	padding: 0 60px 0 10px !important;
+	vertical-align: bottom;
+	text-align: right;
+	white-space: nowrap;
+	font-family: "Lucida Console", Monaco, monospace;
+}
+
+.circuitLabels > div {
+	display: inline-block;
+	width: 20px;
+}
+
+.circuitBackground {
+	position: absolute;
+	top: 0;
+	right: 0;
+	height: 100%;
+	padding-right: 60px;
+	background:
+		repeating-linear-gradient(
+			to left,
+			transparent,
+			transparent 9px,
+			#999 9px,
+			#999 10px,
+			transparent 10px,
+			transparent 20px
+		) content-box;
+}
+
+.circuit {
+	position: absolute;
+	text-align: right;
+}
+
+.circuit > div {
+	position: relative;
+	width: 280px;
+	height: 20px;
+}
+
+.circuitLine {
+	z-index: -1;
+	position: absolute;
+	top: 0;
+	right: 70px;
+	height: 20px;
+	background:
+		linear-gradient(
+			to bottom,
+			transparent,
+			transparent 9px,
+			#000 9px,
+			#000 10px,
+			transparent 10px,
+			transparent 20px
+		) content-box;
+}
+
+.gate {
+	width: 20px;
+	height: 20px;
+	vertical-align: top;
+	filter: drop-shadow(1px 1px 1px #0004);
+	font-family: "Lucida Console", Monaco, monospace;
+	text-anchor: middle;
+}
+
+.rotation {
+	position: relative;
+	display: inline-block;
+	top: 0;
+	right: 0;
+	width: 60px;
+	height: 20px;
+	text-align: center;
+	white-space: nowrap;
+	letter-spacing: -1px;
+	vertical-align: 25%;
+}
+
+.rotation sup {
+	font-size: 75%;
+	vertical-align: 15%;
+}
+
+.rotation sub {
+	font-size: 75%;
+	vertical-align: -7%;
+}
+
+.rotation span {
+	margin: 0 -3px;
+}
+
+.rotation svg {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 60px;
+	height: 20px;
 }

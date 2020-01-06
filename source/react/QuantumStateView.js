@@ -13,7 +13,7 @@ const maxSpacing = 50
 const marginLeft = 112
 const marginRight = 120
 const desiredWidth = 1400
-const height = 514
+const height = 504
 const axleY = 218
 
 export class StateView extends PureComponent {
@@ -63,7 +63,7 @@ export class StateView extends PureComponent {
 		const spacing = Math.max(minSpacing,
 			Math.min(maxSpacing, desiredWidth / (numberOfDisks + 1)))
 		const width = (numberOfDisks + 1) * spacing + marginLeft + marginRight
-		const textTop = height - 52 - 14 * m
+		const textTop = height - 38 - 14 * m
 
 		return <div className={styles.top}>
 			<div ref={this.quantumState} className={styles.quantumState}>
@@ -81,9 +81,9 @@ export class StateView extends PureComponent {
 					min={-24} max={8} defaultValue={-8}
 					className={styles.direction}
 					style={{
-						left: width - marginRight - 117,
-						top: axleY - 5,
-						width: 270
+						left: width - marginRight - 114,
+						top: axleY - 4,
+						width: 268
 					}}
 					onChange={event => {
 						this.setState({
@@ -234,7 +234,7 @@ export class StateView extends PureComponent {
 			const loop = loopStack[i]
 			rows.push(
 				<tr key={i}>
-					<td style={{minWidth: textTop / 2}}>{loop.loopLabel ? loop.loopLabel : "loop"}:</td>
+					<td style={{minWidth: textTop / 3}}>{loop.loopLabel ? loop.loopLabel : "loop"}:</td>
 					<td>{loop.count}</td>
 					<td>of</td>
 					<td>{loop.times}</td>
@@ -461,7 +461,7 @@ class DiskView extends PureComponent {
 				xlinkHref={`#${styles.disk}`}
 				transform={`translate(${x} ${axleY}) skewY(${props.circleSkewY}) scale(${radius * props.circleScaleX} ${radius}) rotate(${-180 / Math.PI * Math.atan2(b, a) + props.rotationDegrees})`}
 			>
-				<title>{Math.round(10000 * probability) / 100}%</title>
+				<title>{Math.round(probability * 10000) / 100}%</title>
 			</use>}
 			<use
 				xlinkHref={`#${styles.axle}`}

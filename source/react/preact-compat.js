@@ -47,7 +47,7 @@ options.vnode = vnode => {
 		if (props && typeof vnode.nodeName == 'string') {
 			// rename specific props from camelCase to kebab-case
 			for (const prop in props) {
-				if (/^(?:fill|stroke|text)[A-Z]/.test(prop)) {
+				if (/^(?:fill|font|stroke|text)[A-Z]/.test(prop)) {
 					const value = props[prop]
 					delete props[prop]
 					props[prop.replace(/([A-Z])/, '-$1').toLowerCase()] = value

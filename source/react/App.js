@@ -5,6 +5,7 @@
  */
 
 import React, { PureComponent } from 'react'
+import dedent from 'dedent-js'
 import { load, save } from '../util/LocalStorage'
 import { QuantumOpTransition } from './QuantumOpTransition'
 import { QuantumProgramView } from './QuantumProgramView'
@@ -14,15 +15,40 @@ import styles from './App.css'
 
 const maxQubits = 10
 
-const defaultProgram =
-`HHHH
-1---,     1/2
- 1--,     1/4
-  1-,     1/8
-   1,    1/16
+const defaultProgram = dedent`
+	---* : 🍕 pepperoni  # 1 ⟹ topping included
+	--*- : 🥓 ham        # 1 ⟹ topping included
+	-*-- : 🍄 mushrooms  # 1 ⟹ topping included
+	*--- : 🍍 pineapples # 1 ⟹ topping included
 
-++-0+,   +1/2
-++-0+,   -1/2`
+	HHHH # start with an equal probability of every possible pizza
+
+	loop 6 times: Grover Iteration
+		---* ---- : ¬Laura # 0 ⟹ Laura's preference satisfied
+		--*- ---- : ¬Jason # 0 ⟹ Jason's preference satisfied
+		-*-- ---- : ¬Chris # 0 ⟹ Chris' preference satisfied
+		*--- ---- : Sam    # 1 ⟹ Sam's preference satisfied
+
+		---+ --00 # Laura - fail if no pepperoni and no ham
+		--+- -00- # Jason - fail if no ham and no mushrooms
+		-+-- --11 # Chris - fail if pepperoni and ham
+		+--- 1010 # Sam 1 - pass if Hawaiian
+		+--- 010- # Sam 2 - pass if not Hawaiian but has veggies
+
+		1000 ---- # rotate disks with all preferences satisfied
+
+		+--- 010- # Sam 2 - undo
+		+--- 1010 # Sam 1 - undo
+		-+-- --11 # Chris - undo
+		--+- -00- # Jason - undo
+		---+ --00 # Laura - undo
+
+		# amplify the minority of disks pointing in opposite direction
+		---- HHHH
+		---- 0000
+		---- HHHH
+	repeat: Grover Iteration
+`
 
 export class App extends PureComponent {
 	constructor(props, context) {
@@ -75,8 +101,7 @@ export class App extends PureComponent {
 	}
 
 	onStop = () => {
-		const {state} = this
-		if (state.transitioning) {
+		if (this.state.transitioning) {
 			// stop at the end of the current operation
 			this.setState({
 				onDone: null,
@@ -199,9 +224,41 @@ export class App extends PureComponent {
 
 	render() {
 		const {state} = this
+
+		const aboutCorner = <div>
+			<div
+				className={styles.corner}
+				onClick={() => this.setState({showAbout: true})}
+			>
+				<div>QModel</div>
+			</div>
+
+			<div
+				className={styles.about}
+				style={{
+					visibility: state.showAbout ? "visible" : "hidden",
+					opacity: state.showAbout ? 1 : 0,
+				}}
+				onClick={() => this.setState({showAbout: false})}
+			>
+				<div>
+					<header>QModel</header>
+					<p>Version {process.env.VERSION}</p>
+					<footer>
+						<div>
+							Copyright © 2019 Mark Suska
+						</div>
+						<div>
+							<a href="https://github.com/EvilHacker/qmodel"><Github/></a>
+						</div>
+					</footer>
+				</div>
+			</div>
+		</div>
+
 		let settings = undefined
 		if (state.showSettings) {
-			settings = <div className={styles.settings} onDoubleClick={this.onSettings}>
+			settings = <div className={styles.settings} onDblClick={this.onSettings}>
 				<table>
 					<tbody>
 						<tr>
@@ -250,52 +307,49 @@ export class App extends PureComponent {
 						</tr>
 					</tbody>
 				</table>
-				<div /* call-out arrow */ onClick={this.onSettings} />
+				<div /* call-out arrow outline */ />
+				<div /* call-out arrow fill */ />
 			</div>
 		}
 
-		return <div className={styles.app}>
-			<h1>Quantum Model</h1>
+		return <table className={styles.app}>
+			<tbody>
+				<tr>
+					<td>
+						<QuantumOpTransition
+							count={state.count}
+							previousState={state.previousState}
+							nextState={state.nextState}
+							ops={state.ops}
+							labels={state.labels}
+							loopStack={state.loopStack}
+							directionMode={state.directionMode}
+							transitionMode={state.transitionMode}
+							fullRotationTime={state.transitionSpeed == "slow" ? 8000 : 2000}
+							onDone={this.onDone}
+						/>
 
-			<div className={styles.quantumState}>
-				<QuantumOpTransition
-					count={state.count}
-					previousState={state.previousState}
-					nextState={state.nextState}
-					ops={state.ops}
-					labels={state.labels}
-					loopStack={state.loopStack}
-					directionMode={state.directionMode}
-					transitionMode={state.transitionMode}
-					fullRotationTime={state.transitionSpeed == "slow" ? 8000 : 2000}
-					onDone={this.onDone}
-				/>
-			</div>
+						{aboutCorner}
+					</td>
+				</tr>
+				<tr>
+					<td className={styles.program}>
+						<QuantumProgramView
+							defaultValue={this.program}
+							maxQubits={maxQubits}
+							onRun={this.onRun}
+							onStop={this.onStop}
+							onReset={this.onReset}
+							onSettings={this.onSettings}
+							onProgramChanged={this.onProgramChanged}
+							onLabelsChanged={this.onLabelsChanged}
+							onLoopStackChanged={this.onLoopStackChanged}
+						/>
 
-			<div className={styles.program}>
-				<QuantumProgramView
-					defaultValue={this.program}
-					maxQubits={maxQubits}
-					onRun={this.onRun}
-					onStop={this.onStop}
-					onReset={this.onReset}
-					onSettings={this.onSettings}
-					onProgramChanged={this.onProgramChanged}
-					onLabelsChanged={this.onLabelsChanged}
-					onLoopStackChanged={this.onLoopStackChanged}
-				/>
-
-				{settings}
-			</div>
-
-			<div className={styles.footer}>
-				<div>
-					Copyright © 2019 Mark Suska
-				</div>
-				<div>
-					<a href="https://github.com/EvilHacker/qmodel"><Github/></a>
-				</div>
-			</div>
-		</div>
+						{settings}
+					</td>
+				</tr>
+			</tbody>
+		</table>
 	}
 }

@@ -15,6 +15,8 @@ import asset from 'rollup-plugin-smart-asset'
 import svgr from '@svgr/rollup'
 import serve from 'rollup-plugin-live-server'
 
+process.env.VERSION = require('./package.json').version
+
 // build options derived from environment variables:
 //  * NODE_ENV - production|development
 //  * SERVER_PORT - undefined or http server port number (default 1234)

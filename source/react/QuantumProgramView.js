@@ -20,7 +20,6 @@ import Cog from './cog.svg'
 const fontSize = 17
 const lineHeight = 20
 const characterWidth = 10
-const padding = 4
 const nullFunction = () => undefined
 
 export class QuantumProgramView extends PureComponent {
@@ -48,13 +47,13 @@ export class QuantumProgramView extends PureComponent {
 
 	state = {
 		programLines: [],
+		qubitsUsed: 0,
 		pointer: 0, // zero based
 		menuLineNumber: null, // zero based
 		errorLineNumber: null, // zero based
 		errorMessage: null,
 		gutterWidth: 0, // in pixels
 		textWidth: 0, // in pixels
-		textHeight: 0, // in pixels
 		verticalScroll: 0, // in pixels
 		stepping: false,
 	}
@@ -76,9 +75,8 @@ export class QuantumProgramView extends PureComponent {
 		let errorMessage = null
 
 		const error = message => {
-			errorLineNumber = lineIndex
+			errorLineNumber = lineIndex -= direction
 			errorMessage = message
-			lineIndex -= direction
 		}
 
 		const loopNotStartedError = line => error(`${loopName(line)} was not started previously`)
@@ -87,7 +85,7 @@ export class QuantumProgramView extends PureComponent {
 			const {type, loopLabel} = loopLine
 			const findDirection = type == "loop" ? 1 : -1
 
-			// find the other end of the loop taking into account nesting loops with same label
+			// find the other end of the loop taking into account nested loops with same label
 			let nesting = 0
 			const i = findIndexFrom(
 				programLines,
@@ -130,7 +128,7 @@ export class QuantumProgramView extends PureComponent {
 			if (type == "op") {
 				opsToRun.push({
 					op: line.op,
-					rotation: direction * line.rotation,
+					rotation: direction * (line.rotation ? line.rotation : 1/2),
 				})
 				if (singleStep || opsToRun.length >= maxOps) {
 					break
@@ -299,7 +297,7 @@ export class QuantumProgramView extends PureComponent {
 
 	scrollLineIntoView(lineNumber) {
 		const textArea = this.textArea.current
-		const pointerTop = lineNumber * lineHeight - this.state.verticalScroll + padding
+		const pointerTop = lineNumber * lineHeight - this.state.verticalScroll
 		if (pointerTop < lineHeight) {
 			const scrollAmount = Math.min(textArea.scrollTop, lineHeight - pointerTop)
 			textArea.scrollTop -= scrollAmount
@@ -410,6 +408,7 @@ export class QuantumProgramView extends PureComponent {
 		let changeI = endI + 1
 		let direction = 1
 		let {pointer} = this.state
+		let qubitsUsed = 0
 
 		while (newI != endI) {
 			const rawLine = rawLines[newI]
@@ -465,12 +464,11 @@ export class QuantumProgramView extends PureComponent {
 						if (op.minLength > maxQubits) {
 							throw `Operation requires ${op.minLength} qubits which is more than the max of ${maxQubits}`
 						}
+						qubitsUsed = Math.max(qubitsUsed, op.length)
 						newLine = {
 							type: "op",
 							op,
-							rotation: rotation
-								? parseReal(rotation)
-								: 0.5
+							rotation: rotation ? parseReal(rotation) : null
 						}
 					} else {
 						newLine = {
@@ -496,8 +494,7 @@ export class QuantumProgramView extends PureComponent {
 						throw `Label unexpected after '${matches[2]}'`
 					}
 					newLine = {
-						type: matches[2],
-						isNoop: true
+						type: matches[2]
 					}
 				}
 			} catch (ex) {
@@ -527,6 +524,7 @@ export class QuantumProgramView extends PureComponent {
 
 		this.setState({
 			programLines: newLines,
+			qubitsUsed,
 			pointer: Math.min(pointer, newLines.length),
 			errorLineNumber: null,
 			errorMessage: null,
@@ -582,7 +580,6 @@ export class QuantumProgramView extends PureComponent {
 		const textArea = this.textArea.current
 		this.setState({
 			textWidth: textArea.clientWidth,
-			textHeight: textArea.clientHeight,
 			verticalScroll: textArea.scrollTop,
 			stepping: false
 		})
@@ -719,25 +716,35 @@ export class QuantumProgramView extends PureComponent {
 			menuLineNumber,
 			gutterWidth,
 			textWidth,
-			verticalScroll,
 		} = state
 		const fontSizePx = `${fontSize}px`
 		const lineHeightPx = `${lineHeight}px`
 		const lineHeightDoublePx = `${lineHeight * 2}px`
 		const gutterWidthPx = `${gutterWidth}px`
-		const textHeightPx = `${state.textHeight}px`
 
-		// gutter with line numbers and error/pause/stop indicators
-		const gutterContent = []
+		// circuit diagram, and gutter (line numbers and error/breakpoint indicators)
+		let circuit = []
+		const gutter = []
+		let qubitsUsed = 1
 		for (let i = 0; i < programLines.length; ++i) {
 			const line = programLines[i]
-			gutterContent.push(
+			const {op} = line
+			if (op && op.length > qubitsUsed) {
+				qubitsUsed = op.length
+			}
+			circuit.push(<CircuitRow
+				key={i}
+				op={op && op.op}
+				rotation={line.rotation}
+			/>)
+			gutter.push(
 				<div
 					key={i}
 					data-line={i}
 					className={styles.gutterRow}
 					style={{
-						top: (i - 0.5) * lineHeight - verticalScroll + padding
+						top: (i - 0.5) * lineHeight,
+						height: lineHeightDoublePx,
 					}}
 				>
 					<div
@@ -760,9 +767,6 @@ export class QuantumProgramView extends PureComponent {
 								stop:  `${styles.breakpointIndicator} ${styles.stop}`,
 							}[line.breakpoint] || styles.breakpointIndicator
 						}
-						style={{
-							right: gutterWidth,
-						}}
 						onClick={this.onGutterClick}
 						onContextMenu={this.onGutterClick}
 					/>
@@ -775,25 +779,34 @@ export class QuantumProgramView extends PureComponent {
 			)
 		}
 
+		// circuit diagram and qubit labels
+		const circuitLabels = []
+		for (let i = qubitsUsed - 1; i >= 0; --i) {
+			circuitLabels.push(<div id={i}>q<sub>{i}</sub></div>)
+		}
+		circuit = <div
+			className={styles.circuit}
+			style={{
+				right: gutterWidth,
+			}}
+		>
+			{circuit}
+		</div>
+
 		// pointer
 		const pointerArrow = <div
 			className={styles.pointer}
 			style={{
-				top: pointer * lineHeight - verticalScroll + padding - 1,
+				top: pointer * lineHeight - 1,
 				transition: state.stepping && "0.2s"
 			}}
 		>
+			<div/>
 			<div
 				style={{
-					width: textWidth,
-					height: 1,
-				}}
-			/>
-			<div
-				style={{
-					width: gutterWidth + 12,
-					height: lineHeight * 0.6 - 1,
-					marginTop: lineHeight * -0.3,
+					width: gutterWidth,
+					height: lineHeight * 0.5 + 1,
+					marginTop: lineHeight * -0.25,
 				}}
 			/>
 		</div>
@@ -805,7 +818,7 @@ export class QuantumProgramView extends PureComponent {
 				<div
 					className={styles.errorHighlight}
 					style={{
-						top: errorLineNumber * lineHeight - verticalScroll + padding,
+						top: errorLineNumber * lineHeight,
 						left: gutterWidthPx,
 						width: textWidth,
 						height: lineHeight,
@@ -814,9 +827,9 @@ export class QuantumProgramView extends PureComponent {
 				<div
 					className={styles.errorMessage}
 					style={{
-						top: (errorLineNumber + 1) * lineHeight - verticalScroll + padding,
-						left: gutterWidthPx,
-						width: textWidth - gutterWidth - (2 * padding + 16)
+						top: (errorLineNumber + 1) * lineHeight,
+						left: gutterWidth + 4,
+						width: textWidth - 20
 					}}
 					onClick={this.dismissError}
 					onContextMenu={this.dismissError}
@@ -833,7 +846,8 @@ export class QuantumProgramView extends PureComponent {
 			gutterMenu = <div
 				className={styles.popup}
 				style={{
-					top: (menuLineNumber - 0.5) * lineHeight - verticalScroll + padding,
+					top: lineHeight *
+						Math.max(0, Math.min(menuLineNumber - 0.8, programLines.length - 5.4)),
 					left: gutterWidthPx
 				}}
 			>
@@ -864,85 +878,209 @@ export class QuantumProgramView extends PureComponent {
 		return <table className={styles.program}>
 			<tbody>
 				<tr>
-					<td>
-						<button className={styles.button} onClick={this.onStepForward}>
-							<div style={{transform: "rotate(90deg)"}}><Step/></div>
-						</button>
-						<button className={styles.button} onClick={this.onStepBackward}>
-							<div style={{transform: "rotate(-90deg)"}}><Step/></div>
-						</button>
-						<button className={styles.button} onClick={this.onRunForward}>
-							<div style={{transform: "rotate(90deg)"}}><Run/></div>
-						</button>
-						<button className={styles.button} onClick={this.onRunBackward}>
-							<div style={{transform: "rotate(-90deg)"}}><Run/></div>
-						</button>
-						<button className={styles.button} onClick={this.onStop}>
-							<Stop/>
-						</button>
-						<button className={styles.button} onClick={this.onReset}>
-							<Reset/>
-						</button>
+					<td className={styles.circuitLabels}>
+						{circuitLabels}
 					</td>
-					{props.onSettings &&
-						<td align="right">
-							<button className={styles.button} onClick={props.onSettings}>
-								<div style={{transform: "rotate(18deg)"}}><Cog/></div>
+					<td/>
+					<td className={styles.buttonBar}>
+						<div>
+							<button onClick={this.onStepForward}>
+								<div style={{transform: "rotate(90deg)"}}><Step/></div>
 							</button>
-						</td>
-					}
+							<button onClick={this.onStepBackward}>
+								<div style={{transform: "rotate(-90deg)"}}><Step/></div>
+							</button>
+							<button onClick={this.onRunForward}>
+								<div style={{transform: "rotate(90deg)"}}><Run/></div>
+							</button>
+							<button onClick={this.onRunBackward}>
+								<div style={{transform: "rotate(-90deg)"}}><Run/></div>
+							</button>
+							<button onClick={this.onStop}>
+								<Stop/>
+							</button>
+							<button onClick={this.onReset}>
+								<Reset/>
+							</button>
+						</div>
+						<div>
+							{props.onSettings && <button onClick={props.onSettings}>
+								<div style={{transform: "rotate(18deg)"}}><Cog/></div>
+							</button>}
+						</div>
+					</td>
 				</tr>
 
 				<tr>
-					<td colSpan={2} className={styles.editor}>
-						<textarea
-							ref={this.textArea}
-							rows={16} cols={64}
-							wrap="off"
-							autoComplete="off"
-							autoCorrect="off"
-							autoCapitalize="off"
-							spellCheck="false"
-							defaultValue={props.defaultValue}
-							style={{
-								lineHeight: lineHeightPx,
-								fontSize: fontSizePx,
-								padding: padding,
-								paddingLeft: state.gutterWidth + characterWidth,
-							}}
-							onChange={this.onUpdateProgramText}
-							onScroll={this.onUpdateScrollPosition}
-							onMouseMove={this.onUpdateScrollPosition}
-							onKeyDown={this.onKeyDown}
-						/>
-
+					<td>
+						<div className={styles.verticalFill}/>
 						<div
-							className={styles.textOverlay}
+							className={styles.circuitBackground}
 							style={{
-								height: textHeightPx,
+								width: 20 * qubitsUsed,
 							}}
-						>
-							{pointerArrow}
-
+						/>
+					</td>
+					<td
+						className={styles.gutter}
+						style={{
+							width: gutterWidthPx,
+							lineHeight: lineHeightPx,
+							fontSize: fontSizePx,
+						}}
+					>
+						<div className={styles.verticalFill}/>
+						<div className={styles.overlay}>
 							<div
-								className={styles.gutter}
 								style={{
+									top: -state.verticalScroll,
 									width: gutterWidthPx,
-									height: textHeightPx,
+								}}
+							>
+								{circuit}
+								{gutter}
+								{pointerArrow}
+								{error}
+								{gutterMenu}
+							</div>
+						</div>
+					</td>
+					<td>
+						<div className={styles.editor}>
+							<textarea
+								ref={this.textArea}
+								wrap="off"
+								autoComplete="off"
+								autoCorrect="off"
+								autoCapitalize="off"
+								spellCheck="false"
+								defaultValue={props.defaultValue}
+								style={{
 									lineHeight: lineHeightPx,
 									fontSize: fontSizePx,
 								}}
-							>
-								{gutterContent}
-							</div>
-
-							{error}
+								onChange={this.onUpdateProgramText}
+								onScroll={this.onUpdateScrollPosition}
+								onMouseMove={this.onUpdateScrollPosition}
+								onKeyDown={this.onKeyDown}
+							/>
 						</div>
-
-						{gutterMenu}
 					</td>
 				</tr>
 			</tbody>
 		</table>
+	}
+}
+
+const gateImages = {
+	"-": <svg className={styles.gate}/>,
+	0: <svg className={styles.gate} viewBox="0 0 20 20" stroke="#000">
+		<circle cx={10} cy={10} r={5} fill="#fff"/>
+	</svg>,
+	1: <svg className={styles.gate} viewBox="0 0 20 20" stroke="#000">
+		<circle cx={10} cy={10} r={5} fill="#000"/>
+	</svg>,
+	H: <svg className={styles.gate} viewBox="0 0 20 20">
+		<path d="M2,2h16v16h-16z" fill="#fff" stroke="#000"/>
+		<path d="M6.5,10h7M7,4v12M13,4v12" stroke="#000" strokeWidth={1.5}/>
+	</svg>,
+	N: <svg className={styles.gate} viewBox="0 0 20 20" stroke="#000">
+		<circle cx={10} cy={10} r={8} fill="#fff"/>
+		<path d="M10,2v16M2,10h16"/>
+	</svg>,
+	X: <svg className={styles.gate} viewBox="0 0 20 20">
+		<path d="M2,2h16v16h-16z" fill="#fff" stroke="#000"/>
+		<text x={8} y={16} fontSize="14px">X</text>
+		<text x={14} y={11} fontSize="9px">2</text>
+	</svg>,
+	Y: <svg className={styles.gate} viewBox="0 0 20 20">
+		<path d="M2,2h16v16h-16z" fill="#fff" stroke="#000"/>
+		<text x={8} y={16} fontSize="14px">Y</text>
+		<text x={14} y={11} fontSize="9px">2</text>
+	</svg>,
+}
+
+const rotationArcLeft = <svg className={styles.rotationArc} viewBox="0 0 60 20">
+	<path d="M8,0v6m-3-3h6m4,-3v6q16,-11 32,0" fill="none" stroke="#000"/>
+</svg>
+
+const rotationArcRight = <svg className={styles.rotationArc} viewBox="0 0 60 20">
+	<path d="M15,6q16,-11 32,0v-6m4,3h6" fill="none" stroke="#000"/>
+</svg>
+
+class CircuitRow extends PureComponent {
+	static propTypes = {
+		op: PropTypes.string,
+		rotation: PropTypes.number,
+	}
+
+	render() {
+		const fraction = rotation => {
+			if (rotation == null) {
+				return <div className={styles.rotation}/>
+			}
+			const arc = rotation < 0 ? rotationArcRight : rotationArcLeft
+			const abs = Math.abs(rotation)
+			const i = abs < 1 ? "" : (abs < 10 ? Math.floor(abs) : "N")
+			const f = abs % 1
+			const gcd = (a, b) => b >= 0.5**10 ? gcd(b, a % b) : a
+			const n = gcd(f, 1)
+			const numerator = Math.round(f / n)
+			const denominator = Math.round(1 / n)
+			if (numerator && Math.abs(f - (numerator / denominator)) < 1e-6) {
+				if (numerator) {
+					return <div className={styles.rotation}>
+						{i}<sup>{numerator}</sup><span>/</span><sub>{denominator}</sub>
+						{arc}
+					</div>
+				} else {
+					return <div className={styles.rotation}>
+						{i}
+						{arc}
+					</div>
+				}
+			} else {
+				return <div className={styles.rotation}>
+					<sub>{i}{`${Math.round(f * 1000) / 1000}`.slice(1)}</sub>
+					{arc}
+				</div>
+			}
+		}
+
+		const {op, rotation} = this.props
+		const gates = []
+		let hasCondition = false
+		let lastGate = 0
+		if (op != null) {
+			// gates from left to right
+			for (let i = 0; i < op.length; ++i) {
+				const c = op[i]
+				gates.push(gateImages[c])
+				if (c != '-') {
+					lastGate = i
+					if ("01".includes(c)) {
+						hasCondition = true
+					}
+				}
+			}
+
+			// rotation fraction and direction arc & arrow
+			gates.push(fraction(
+				op === "" && rotation == null
+					? 1/2
+					: rotation
+			))
+		}
+
+		return <div>
+			{hasCondition && <div
+				className={styles.circuitLine}
+				style={{
+					width: 20 * lastGate,
+					marginRight: 20 * (op.length - lastGate - 1),
+				}}
+			/>}
+			{gates}
+		</div>
 	}
 }
