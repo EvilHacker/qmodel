@@ -48,6 +48,7 @@ const defaultProgram = dedent`
 		---- 0000
 		---- HHHH
 	repeat: Grover Iteration
+
 `
 
 export class App extends PureComponent {
