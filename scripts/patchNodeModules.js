@@ -26,6 +26,9 @@
  * 3) Also, source mappings included with Preact are buggy so don't them.
  * Prefer to have accurate source mappings to built "dist" code
  * which is already decently formatted.
+ *
+ * ** dedent.macro **
+ * Correct import statement.
  */
 
 const promisify = require('util').promisify
@@ -43,6 +46,7 @@ const patchAll = async () => await Promise.all([
 	patchRollup(),
 	patchBabel(),
 	patchPreact(),
+	patchDedentMacro(),
 ])
 
 patchAll()
@@ -136,4 +140,18 @@ async function patchPreact() {
 	const fileOut = "node_modules/preact/dist/preact.es.js"
 	return fsp.readFile(fileIn, "utf-8")
 		.then(code => writeFileOnlyIfDifferent(fileOut, patch(code)))
+}
+
+async function patchDedentMacro() {
+	const patch = code => code.replace(
+		/\brequire\("dedent"\).default\b/,
+		`require("dedent-js")`
+	)
+
+	const file = "node_modules/dedent.macro/index.js"
+	return fsp.readFile(file, "utf-8")
+		.then(code => {
+			const patchedCode = patch(code)
+			return patchedCode === code || fsp.writeFile(file, patchedCode)
+		})
 }

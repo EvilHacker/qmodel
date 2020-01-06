@@ -5,7 +5,7 @@
  */
 
 import React, { PureComponent } from 'react'
-import dedent from 'dedent-js'
+import dedent from 'dedent.macro'
 import { load, save } from '../util/LocalStorage'
 import { QuantumOpTransition } from './QuantumOpTransition'
 import { QuantumProgramView } from './QuantumProgramView'
